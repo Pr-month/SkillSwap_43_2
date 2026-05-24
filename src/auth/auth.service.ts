@@ -25,7 +25,6 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    const { password: _, ...result } = user;
-    return result;
+    return { id: user.id, name: user.name, email: user.email };
   }
 }
