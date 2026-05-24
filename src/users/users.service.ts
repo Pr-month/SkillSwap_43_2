@@ -1,32 +1,34 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { User } from './entities/user.entity';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class UsersService {
-  create(createUserDto: CreateUserDto) {
-    return {
-      message: 'This action adds a new user',
-      payload: createUserDto,
-    };
-  }
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
 
-  findAll() {
-    return `This action returns all users`;
-  }
+  async updatePassword(id: string, dto: UpdatePasswordDto): Promise<void> {
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.id = :id', { id })
+      .getOne();
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+    if (!user) throw new NotFoundException('User not found');
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return {
-      message: `This action updates a #${id} user`,
-      payload: updateUserDto,
-    };
-  }
+    const isMatch = await bcrypt.compare(dto.oldPassword, user.password);
+    if (!isMatch) throw new UnauthorizedException('Old password is incorrect');
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    user.password = await bcrypt.hash(dto.newPassword, 10);
+    await this.usersRepository.save(user);
   }
 }
