@@ -5,15 +5,7 @@ import {
   OneToMany,
   ManyToMany,
 } from 'typeorm';
-import {
-  Length,
-  IsEmail,
-  IsNotEmpty,
-  IsIn,
-  IsDateString,
-  IsJWT,
-  IsUUID,
-} from 'class-validator';
+
 import { Roles, Gender } from '../../utils/types';
 
 @Entity({
@@ -21,35 +13,32 @@ import { Roles, Gender } from '../../utils/types';
 })
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  @IsUUID()
   id: string;
 
   @Column()
-  @Length(2, 15)
   name: string;
-
-  @Column()
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
 
   @Column({
     unique: true,
   })
+  email: string;
+
+  @Column()
   password: string;
 
   @Column()
   about: string;
 
   @Column()
-  @IsDateString()
   birthdate: string;
 
   @Column()
   city: string; // здесь теоретически должна быть связь один-к-одному с сущностью "город" из справочника городов
 
-  @Column()
-  @IsIn(Object.values(Gender))
+  @Column({
+    type: 'enum',
+    enum: Gender,
+  })
   gender: string;
 
   @Column()
@@ -64,11 +53,13 @@ export class User {
   @ManyToMany(() => Skill, (skill) => skill.id) // в сущности Skill использовать @JoinTable()
   favoriteSkills: Skill[];
 
-  @Column()
-  @IsIn(Object.values(Roles))
+  @Column({
+    type: 'enum',
+    enum: Roles,
+    default: Roles.user,
+  })
   role: string;
 
   @Column()
-  @IsJWT()
   refreshToken: string;
 }
