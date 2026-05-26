@@ -44,14 +44,20 @@ export class User {
   @Column()
   avatar: string;
 
-  @OneToMany(() => Skill, (skill) => skill.owner)
-  skills: Skill[];
+  @Column('simple-array') // заменить на код ниже, когда будут созданы соотв. сущности
+  skills: string[]; 
+//  @OneToMany(() => Skill, (skill) => skill.owner)
+//  skills: Skill[];
 
-  @ManyToMany(() => Category, (category) => category.id) // в сущности Category использовать @JoinTable()
-  wantToLearn: Categories[];
-
-  @ManyToMany(() => Skill, (skill) => skill.id) // в сущности Skill использовать @JoinTable()
-  favoriteSkills: Skill[];
+  @Column('simple-array') // заменить на код ниже, когда будут созданы соотв. сущности
+  wantToLearn: string[];
+ // @ManyToMany(() => Category, (category) => category.id) // в сущности Category использовать @JoinTable()
+//  wantToLearn: Categories[];
+ 
+  @Column('simple-array') // заменить на код ниже, когда будут созданы соотв. сущности
+  favoriteSkills: string[];
+ // @ManyToMany(() => Skill, (skill) => skill.id) // в сущности Skill использовать @JoinTable()
+//  favoriteSkills: Skill[];
 
   @Column({
     type: 'enum',
