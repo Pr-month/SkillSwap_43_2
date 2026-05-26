@@ -12,4 +12,14 @@ export class UsersController {
   getMe(@Req() req: Request & { user: { sub: string } }) {
     return this.usersService.findById(req.user.sub);
   }
+  
+  @Patch('me/password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  updatePassword(
+    @Req() req: Request & { user: { sub: string } },
+    @Body() dto: UpdatePasswordDto,
+  ): Promise<void> {
+    return this.usersService.updatePassword(req.user.sub, dto);
+  }
 }
