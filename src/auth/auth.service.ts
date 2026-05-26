@@ -9,6 +9,8 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    @Inject(appConfig.KEY)
+    private readonly config: ConfigType<typeof appConfig>,
   ) {}
 
   async login(dto: LoginDto) {
@@ -26,5 +28,20 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken };
+  )
+
+  async register(dto: RegisterDto) {
+    const existing = await this.usersService.findByEmail(dto.email);
+    if (existing) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, this.config.hashSalt);
+    const user = await this.usersService.create({
+      ...dto,
+      password: hashedPassword,
+    });
+
+    return { id: user.id, name: user.name, email: user.email };
   }
 }

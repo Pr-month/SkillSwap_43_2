@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 
 @Module({
   imports: [
+    ConfigModule.forFeature(appConfig),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: {
