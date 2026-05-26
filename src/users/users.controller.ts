@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   Req,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,17 +17,18 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
   getMe(@Req() req: Request & { user: { sub: string } }) {
     return this.usersService.findById(req.user.sub);
   }
-  
+
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
@@ -33,7 +36,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findById(id);
   }
 
   @Patch('me')
@@ -48,14 +51,10 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     const id = req.user.sub;
-    return await this.usersService.update(+id, updateUserDto);
+    return await this.usersService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
-  
+
   @Patch('me/password')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)

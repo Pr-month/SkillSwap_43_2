@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -10,11 +11,15 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(data: Partial<User>): Promise<User> {
     const user = this.usersRepository.create(data);
     return this.usersRepository.save(user);
+  }
+
+  async findAll(): Promise<User[]> {
+    return await this.usersRepository.find();
   }
 
   async findById(id: string): Promise<User> {
@@ -25,8 +30,8 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.usersRepository.findOne(id);
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(
         `Невозможно обновить данные: пользователь с id ${id} не найден`,
@@ -42,7 +47,7 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
   }
-  
+
   async updatePassword(id: string, dto: UpdatePasswordDto): Promise<void> {
     const user = await this.usersRepository
       .createQueryBuilder('user')

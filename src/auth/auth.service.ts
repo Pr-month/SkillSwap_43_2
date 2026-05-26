@@ -1,7 +1,12 @@
-﻿import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
-import { RefreshDto } from './dto/refresh.dto';
+﻿import { Injectable, Inject, UnauthorizedException, ConflictException } from "@nestjs/common";
+import { ConfigType } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import { appConfig } from "src/config/app.config";
+import { UsersService } from "src/users/users.service";
+import { LoginDto } from "./dto/login.dto";
+import { RefreshDto } from "./dto/refresh.dto";
+import { RegisterDto } from "./dto/register.dto";
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -10,7 +15,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @Inject(appConfig.KEY)
     private readonly config: ConfigType<typeof appConfig>,
-  ) {}
+  ) { }
 
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
@@ -27,7 +32,8 @@ export class AuthService {
     const accessToken = await this.jwtService.signAsync(payload);
 
     return { accessToken };
-  )
+
+  }
 
   async register(dto: RegisterDto) {
     const existing = await this.usersService.findByEmail(dto.email);
@@ -43,11 +49,11 @@ export class AuthService {
 
     return { id: user.id, name: user.name, email: user.email };
   }
-      
+
   logout() {
     return { message: 'Logged out successfully' };
   }
-      
+
   async refresh(dto: RefreshDto) {
     try {
       const payload = this.jwtService.verify<{
@@ -72,5 +78,5 @@ export class AuthService {
     } catch {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
-}
+  }
 }

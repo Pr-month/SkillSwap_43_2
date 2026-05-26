@@ -5,6 +5,7 @@ import {
   IsIn,
   IsDateString,
   IsString,
+  ArrayNotEmpty,
 } from 'class-validator';
 import { Gender } from '../../utils/types';
 

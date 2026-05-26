@@ -55,14 +55,14 @@ export class User {
   @Column()
   avatar: string;
 
-  @OneToMany(() => Skill, (skill) => skill.owner)
-  skills: Skill[];
+  // @OneToMany(() => Skill, (skill) => skill.owner)
+  // skills: Skill[];
 
-  @ManyToMany(() => Category, (category) => category.id) // в сущности Category использовать @JoinTable()
-  wantToLearn: Categories[];
+  // @ManyToMany(() => Category, (category) => category.id) // в сущности Category использовать @JoinTable()
+  // wantToLearn: Categories[];
 
-  @ManyToMany(() => Skill, (skill) => skill.id) // в сущности Skill использовать @JoinTable()
-  favoriteSkills: Skill[];
+  // @ManyToMany(() => Skill, (skill) => skill.id) // в сущности Skill использовать @JoinTable()
+  // favoriteSkills: Skill[];
 
   @Column()
   @IsIn(Object.values(Roles))
