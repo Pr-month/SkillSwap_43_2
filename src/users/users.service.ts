@@ -1,13 +1,9 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
-import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -27,6 +23,20 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.usersRepository.findOne(id);
+    if (!user) {
+      throw new NotFoundException(
+        `Невозможно обновить данные: пользователь с id ${id} не найден`,
+      );
+    }
+    const newUser = {
+      ...user,
+      ...updateUserDto,
+    };
+    return await this.usersRepository.save(newUser);
   }
 
   async findByEmail(email: string): Promise<User | null> {
