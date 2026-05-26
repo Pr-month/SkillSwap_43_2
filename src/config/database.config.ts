@@ -13,3 +13,5 @@ export const databaseConfig = registerAs(
     synchronize: process.env.NODE_ENV !== 'production',
   }),
 );
+
+export type DatabaseConfig = ReturnType<typeof databaseConfig>
