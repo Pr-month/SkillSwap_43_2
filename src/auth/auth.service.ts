@@ -1,8 +1,7 @@
 ﻿import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
-import { LoginDto } from './dto/login.dto';
+import { RefreshDto } from './dto/refresh.dto';
 
 @Injectable()
 export class AuthService {
@@ -48,4 +47,30 @@ export class AuthService {
   logout() {
     return { message: 'Logged out successfully' };
   }
+      
+  async refresh(dto: RefreshDto) {
+    try {
+      const payload = this.jwtService.verify<{
+        sub: string;
+        email: string;
+        type: string;
+      }>(dto.refreshToken);
+
+      if (payload.type !== 'refresh') {
+        throw new UnauthorizedException('Invalid token type');
+      }
+
+      const user = await this.usersService.findByEmail(payload.email);
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      const newPayload = { sub: user.id, email: user.email };
+      const accessToken = await this.jwtService.signAsync(newPayload);
+
+      return { accessToken };
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+}
 }
