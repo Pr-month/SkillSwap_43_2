@@ -6,15 +6,18 @@ import { AppService } from './app.service';
 import { databaseConfig } from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import jwtConfig from 'jwt.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [databaseConfig],
+      load: [databaseConfig, jwtConfig],
     }),
+
     TypeOrmModule.forRootAsync({
       inject: [databaseConfig.KEY],
+
       useFactory: (
         dbConfig: ConfigType<typeof databaseConfig>,
       ): TypeOrmModuleOptions => ({
