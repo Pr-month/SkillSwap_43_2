@@ -16,6 +16,23 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
+  async create(data: Partial<User>): Promise<User> {
+    const user = this.usersRepository.create(data);
+    return this.usersRepository.save(user);
+  }
+
+  async findById(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
+  }
+  
   async updatePassword(id: string, dto: UpdatePasswordDto): Promise<void> {
     const user = await this.usersRepository
       .createQueryBuilder('user')
