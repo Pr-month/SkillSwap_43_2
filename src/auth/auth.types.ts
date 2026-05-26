@@ -5,7 +5,11 @@ export enum Role {
   ADMIN = 'ADMIN',
 }
 
-export type TJwtPayload = { sub: string; email: string; role: Role };
+export type TJwtPayload = {
+  sub: string;
+  email: string;
+  role: Role;
+};
 
 export interface IAuthorizedRequest extends Request {
   user: TJwtPayload;
