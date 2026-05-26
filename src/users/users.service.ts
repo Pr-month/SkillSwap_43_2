@@ -6,7 +6,6 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { AppConfig } from '../config/app.config';
-import { ConfigType } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +13,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @Inject('app')
-    private readonly config: ConfigType<AppConfig>,
+    private readonly config: AppConfig,
   ) { }
 
   async create(data: Partial<User>): Promise<User> {
