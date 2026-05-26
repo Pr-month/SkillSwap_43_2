@@ -9,22 +9,20 @@ import { User } from './entities/user.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return {
-      message: 'This action adds a new user',
-      payload: createUserDto,
-    };
+  async create(data: Partial<User>): Promise<User> {
+    const user = this.usersRepository.create(data);
+    return this.usersRepository.save(user);
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.usersRepository.find();
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findById(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
@@ -41,7 +39,23 @@ export class UsersService {
     return await this.usersRepository.save(newUser);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
+  }
+  
+  async updatePassword(id: string, dto: UpdatePasswordDto): Promise<void> {
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.id = :id', { id })
+      .getOne();
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const isMatch = await bcrypt.compare(dto.oldPassword, user.password);
+    if (!isMatch) throw new UnauthorizedException('Old password is incorrect');
+
+    user.password = await bcrypt.hash(dto.newPassword, 10);
+    await this.usersRepository.save(user);
   }
 }

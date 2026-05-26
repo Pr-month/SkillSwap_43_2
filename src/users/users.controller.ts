@@ -20,11 +20,12 @@ import { Request } from 'express';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@Req() req: Request & { user: { sub: string } }) {
+    return this.usersService.findById(req.user.sub);
   }
-
+  
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
@@ -53,5 +54,15 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+  
+  @Patch('me/password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  updatePassword(
+    @Req() req: Request & { user: { sub: string } },
+    @Body() dto: UpdatePasswordDto,
+  ): Promise<void> {
+    return this.usersService.updatePassword(req.user.sub, dto);
   }
 }
