@@ -41,7 +41,7 @@ export class UsersController {
   }
 
   @Patch('me')
-  @UseGuards(JwtAuthGuard) // эта гарда уже создана другим участником, и я не стала создавать дубль
+  @UseGuards(JwtAuthGuard)
   async update(
     @Req()
     req: Request & {
