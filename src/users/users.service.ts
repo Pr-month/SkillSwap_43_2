@@ -12,7 +12,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-    @Inject('app')
+    @Inject(appConfig.KEY)
     private readonly config: AppConfig,
   ) { }
 
