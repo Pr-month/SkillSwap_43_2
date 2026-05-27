@@ -18,6 +18,7 @@ import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { IAuthorizedRequest } from '../../src/auth/auth.types';
 
 @Controller('users')
 export class UsersController {
@@ -25,7 +26,7 @@ export class UsersController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  getMe(@Req() req: Request & { user: { sub: string } }) {
+  getMe(@Req() req: IAuthorizedRequest) {
     return this.usersService.findById(req.user.sub);
   }
 

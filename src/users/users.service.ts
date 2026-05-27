@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { appConfig } from 'src/config/app.config';
 import { Repository } from 'typeorm';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -16,13 +17,14 @@ export class UsersService {
     private readonly config: AppConfig,
   ) { }
 
+
   async create(data: Partial<User>): Promise<User> {
     const user = this.usersRepository.create(data);
     return this.usersRepository.save(user);
   }
 
   async findAll(): Promise<User[]> {
-    return await this.usersRepository.find();
+    return this.usersRepository.find();
   }
 
   async findById(id: string): Promise<User> {
@@ -40,15 +42,19 @@ export class UsersService {
         `Невозможно обновить данные: пользователь с id ${id} не найден`,
       );
     }
-    const newUser = {
-      ...user,
-      ...updateUserDto,
-    };
-    return await this.usersRepository.save(newUser);
+    return this.usersRepository.save({ ...user, ...updateUserDto });
   }
 
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({ where: { email } });
+  }
+
+  async saveRefreshToken(id: string, refreshToken: string): Promise<void> {
+    await this.usersRepository.update({ id }, { refreshToken });
+  }
+
+  async clearRefreshToken(id: string): Promise<void> {
+    await this.usersRepository.update({ id }, { refreshToken: null as unknown as string });
   }
 
   async updatePassword(id: string, dto: UpdatePasswordDto): Promise<void> {
