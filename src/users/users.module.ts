@@ -9,7 +9,6 @@ import { appConfig } from '../config/app.config';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    ConfigModule.forFeature(appConfig),
   ],
   controllers: [UsersController],
   providers: [UsersService],
