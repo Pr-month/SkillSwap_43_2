@@ -5,7 +5,7 @@ import {
   // OneToMany,
   // ManyToMany,
 } from 'typeorm';
-import { Roles, Gender } from '../../utils/types';
+import { Roles, Gender } from '../users.enums';
 
 @Entity({
   name: 'users',
