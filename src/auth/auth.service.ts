@@ -1,12 +1,25 @@
-﻿import { Injectable, Inject, UnauthorizedException, ConflictException } from "@nestjs/common";
-import { ConfigType } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
-import { appConfig } from "src/config/app.config";
-import { UsersService } from "src/users/users.service";
-import { LoginDto } from "./dto/login.dto";
-import { RefreshDto } from "./dto/refresh.dto";
-import { RegisterDto } from "./dto/register.dto";
+﻿import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { appConfig } from 'src/config/app.config';
+import { jwtConfig } from 'src/config/jwt.config';
+import { UsersService } from 'src/users/users.service';
+import { Role, TJwtPayload } from './auth.types';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+
+interface IUserData {
+  id: string;
+  email: string;
+  password?: string;
+  role: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -14,12 +27,30 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     @Inject(appConfig.KEY)
-    private readonly config: ConfigType<typeof appConfig>,
-  ) { }
+    private readonly appConfiguration: ConfigType<typeof appConfig>,
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+  ) {}
+
+  private async generateTokens(payload: TJwtPayload) {
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: this.jwtConfiguration.secret,
+      expiresIn: this.jwtConfiguration.expiresIn as unknown as number,
+    });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: this.jwtConfiguration.refreshSecret,
+      expiresIn: this.jwtConfiguration.refreshExpiresIn as unknown as number,
+    });
+
+    return { accessToken, refreshToken };
+  }
 
   async login(dto: LoginDto) {
-    const user = await this.usersService.findByEmail(dto.email);
-    if (!user) {
+    const user = (await this.usersService.findByEmail(
+      dto.email,
+    )) as IUserData | null;
+    if (!user || !user.password) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -28,11 +59,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, email: user.email };
-    const accessToken = await this.jwtService.signAsync(payload);
+    const payload: TJwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role as Role,
+    };
 
-    return { accessToken };
-
+    return this.generateTokens(payload);
   }
 
   async register(dto: RegisterDto) {
@@ -41,42 +74,44 @@ export class AuthService {
       throw new ConflictException('User with this email already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password, this.config.hashSalt);
-    const user = await this.usersService.create({
+    const hashedPassword = await bcrypt.hash(
+      dto.password,
+      Number(this.appConfiguration.hashSalt),
+    );
+
+    const user = (await this.usersService.create({
       ...dto,
       password: hashedPassword,
-    });
+    })) as IUserData;
 
-    return { id: user.id, name: user.name, email: user.email };
+    const payload: TJwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role as Role,
+    };
+
+    return this.generateTokens(payload);
   }
 
-  logout() {
+  async logout(userId: string) {
+    await this.usersService.findById(userId);
     return { message: 'Logged out successfully' };
   }
 
-  async refresh(dto: RefreshDto) {
-    try {
-      const payload = this.jwtService.verify<{
-        sub: string;
-        email: string;
-        type: string;
-      }>(dto.refreshToken);
-
-      if (payload.type !== 'refresh') {
-        throw new UnauthorizedException('Invalid token type');
-      }
-
-      const user = await this.usersService.findByEmail(payload.email);
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-
-      const newPayload = { sub: user.id, email: user.email };
-      const accessToken = await this.jwtService.signAsync(newPayload);
-
-      return { accessToken };
-    } catch {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+  async refresh(payload: TJwtPayload) {
+    const user = (await this.usersService.findByEmail(
+      payload.email,
+    )) as IUserData | null;
+    if (!user) {
+      throw new UnauthorizedException('User not found');
     }
+
+    const newPayload: TJwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role as Role,
+    };
+
+    return this.generateTokens(newPayload);
   }
 }
