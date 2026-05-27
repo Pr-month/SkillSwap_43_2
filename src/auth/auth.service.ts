@@ -1,25 +1,18 @@
-﻿import {
+import {
   ConflictException,
   Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { appConfig } from 'src/config/app.config';
-import { jwtConfig } from 'src/config/jwt.config';
+import { AppConfig, appConfig } from 'src/config/app.config';
+import { JwtConfig, jwtConfig } from 'src/config/jwt.config';
+import { Roles } from 'src/users/users.enums';
 import { UsersService } from 'src/users/users.service';
-import { Role, TJwtPayload } from './auth.types';
+import { TJwtPayload } from './auth.types';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-
-interface IUserData {
-  id: string;
-  email: string;
-  password?: string;
-  role: string;
-}
 
 @Injectable()
 export class AuthService {
@@ -27,9 +20,9 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     @Inject(appConfig.KEY)
-    private readonly appConfiguration: ConfigType<typeof appConfig>,
+    private readonly appConfiguration: AppConfig,
     @Inject(jwtConfig.KEY)
-    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+    private readonly jwtConfiguration: JwtConfig,
   ) {}
 
   private async generateTokens(payload: TJwtPayload) {
@@ -47,9 +40,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = (await this.usersService.findByEmail(
-      dto.email,
-    )) as IUserData | null;
+    const user = await this.usersService.findByEmail(dto.email);
     if (!user || !user.password) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -62,10 +53,12 @@ export class AuthService {
     const payload: TJwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role as Role,
+      role: user.role as Roles,
     };
 
-    return this.generateTokens(payload);
+    const tokens = await this.generateTokens(payload);
+    await this.usersService.saveRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
   }
 
   async register(dto: RegisterDto) {
@@ -76,42 +69,44 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(
       dto.password,
-      Number(this.appConfiguration.hashSalt),
+      this.appConfiguration.hashSalt,
     );
 
-    const user = (await this.usersService.create({
+    const user = await this.usersService.create({
       ...dto,
       password: hashedPassword,
-    })) as IUserData;
+    });
 
     const payload: TJwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role as Role,
+      role: user.role as Roles,
     };
 
-    return this.generateTokens(payload);
+    const tokens = await this.generateTokens(payload);
+    await this.usersService.saveRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
   }
 
   async logout(userId: string) {
-    await this.usersService.findById(userId);
+    await this.usersService.clearRefreshToken(userId);
     return { message: 'Logged out successfully' };
   }
 
-  async refresh(payload: TJwtPayload) {
-    const user = (await this.usersService.findByEmail(
-      payload.email,
-    )) as IUserData | null;
-    if (!user) {
-      throw new UnauthorizedException('User not found');
+  async refresh(payload: TJwtPayload, refreshToken: string) {
+    const user = await this.usersService.findById(payload.sub);
+    if (!user.refreshToken || user.refreshToken !== refreshToken) {
+      throw new UnauthorizedException('Invalid refresh token');
     }
 
     const newPayload: TJwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role as Role,
+      role: user.role as Roles,
     };
 
-    return this.generateTokens(newPayload);
+    const tokens = await this.generateTokens(newPayload);
+    await this.usersService.saveRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
   }
 }

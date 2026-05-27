@@ -2,6 +2,7 @@
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { appConfig } from 'src/config/app.config';
 import { jwtConfig } from 'src/config/jwt.config';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
@@ -13,6 +14,7 @@ import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy';
 
 @Module({
   imports: [
+    ConfigModule.forFeature(appConfig),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.register({}),
     UsersModule,

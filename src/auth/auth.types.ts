@@ -1,14 +1,10 @@
 import { Request } from 'express';
-
-export enum Role {
-  USER = 'USER',
-  ADMIN = 'ADMIN',
-}
+import { Roles } from '../users/users.enums';
 
 export type TJwtPayload = {
   sub: string;
   email: string;
-  role: Role;
+  role: Roles;
 };
 
 export interface IAuthorizedRequest extends Request {

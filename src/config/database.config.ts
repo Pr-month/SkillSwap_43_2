@@ -14,4 +14,4 @@ export const databaseConfig = registerAs(
   }),
 );
 
-export type DatabaseConfig = ReturnType<typeof databaseConfig>
+export type DatabaseConfig = ReturnType<typeof databaseConfig>;
