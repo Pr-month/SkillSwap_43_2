@@ -6,58 +6,55 @@ import {
   // ManyToMany,
 } from 'typeorm';
 import { Roles, Gender } from '../users.enums';
+import { Skill } from '../../skills/entities/skill.entity';
 
 @Entity({
   name: 'users',
 })
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
 
   @Column()
-  name!: string;
+  name: string;
 
   @Column({
     unique: true,
   })
-  email!: string;
+  email: string;
 
   @Column()
-  password!: string;
+  password: string;
 
-  @Column({ nullable: true })
-  about!: string;
+  @Column()
+  about: string;
 
-  @Column({ nullable: true })
-  birthdate!: string;
+  @Column()
+  birthdate: string;
 
-  @Column({ nullable: true })
-  city!: string; // здесь теоретически должна быть связь один-к-одному с сущностью "город" из справочника городов
+  @Column()
+  city: string; // здесь теоретически должна быть связь один-к-одному с сущностью "город" из справочника городов
 
-  @Column({ type: 'enum', enum: Gender, nullable: true })
-  gender!: string;
+  @Column({ type: 'enum', enum: Gender })
+  gender: string;
 
-  @Column({ nullable: true })
-  avatar!: string;
+  @Column()
+  avatar: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  skills!: string[];
-  // @OneToMany(() => Skill, (skill) => skill.owner)
-  // skills: Skill[];
+  @OneToMany(() => Skill, (skill) => skill.owner)
+  skills: Skill[];
 
-  @Column({ type: 'simple-array', nullable: true })
-  wantToLearn!: string[];
+  @Column({ type: 'simple-array', default: [] })
+  wantToLearn: string[];
   // @ManyToMany(() => Category, (category) => category.id) // в сущности Category использовать @JoinTable()
   // wantToLearn: Categories[];
 
-  @Column({ type: 'simple-array', nullable: true })
-  favoriteSkills!: string[];
-  // @ManyToMany(() => Skill, (skill) => skill.id) // в сущности Skill использовать @JoinTable()
-  // favoriteSkills: Skill[];
+  @ManyToMany(() => Skill, (skill) => skill.users) 
+  favoriteSkills: Skill[];
 
   @Column({ type: 'enum', enum: Roles, default: Roles.USER })
-  role!: string;
+  role: string;
 
   @Column({ nullable: true })
-  refreshToken!: string;
+  refreshToken: string;
 }

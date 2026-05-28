@@ -1,0 +1,38 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+
+@Entity({
+  name: 'skills',
+})
+export class Skill {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  title: string;
+
+  @Column()
+  description: string;
+
+  @Column()
+  category: string;
+  // @ManyToOne(() => Category, (category) => category.skills);
+  // category: Category;
+
+  @Column({ type: 'simple-array' })
+  images: string[];
+
+  @ManyToOne(() => User, (user) => user.skills)
+  owner: User;
+
+  @ManyToMany(() => User, (user) => user.favoriteSkills)
+  @JoinTable()
+  users: Users[];
+}
