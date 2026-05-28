@@ -21,10 +21,8 @@ export class Skill {
   @Column()
   description: string;
 
-  @Column()
-  category: string;
-  // @ManyToOne(() => Category, (category) => category.skills);
-  // category: Category;
+  @ManyToOne(() => Category, (category) => category.children);
+  category: Category;
 
   @Column({ type: 'simple-array' })
   images: string[];
