@@ -2,8 +2,8 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  // OneToMany,
-  // ManyToMany,
+  OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { Roles, Gender } from '../users.enums';
 import { Skill } from '../../skills/entities/skill.entity';
@@ -44,10 +44,8 @@ export class User {
   @OneToMany(() => Skill, (skill) => skill.owner)
   skills: Skill[];
 
-  @Column({ type: 'simple-array', default: [] })
-  wantToLearn: string[];
-  // @ManyToMany(() => Category, (category) => category.id) // в сущности Category использовать @JoinTable()
-  // wantToLearn: Categories[];
+  @ManyToMany(() => Category, (category) => category.users)
+  wantToLearn: Categories[];
 
   @ManyToMany(() => Skill, (skill) => skill.users) 
   favoriteSkills: Skill[];
@@ -56,5 +54,5 @@ export class User {
   role: string;
 
   @Column({ nullable: true })
-  refreshToken: string;
+  refreshToken: string | null;
 }
