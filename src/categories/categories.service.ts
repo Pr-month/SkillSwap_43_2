@@ -1,0 +1,19 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { IsNull, Repository } from 'typeorm';
+import { Category } from './entities/category.entity';
+
+@Injectable()
+export class CategoriesService {
+  constructor(
+    @InjectRepository(Category)
+    private readonly categoriesRepository: Repository<Category>,
+  ) {}
+
+  async findAll(): Promise<Category[]> {
+    return this.categoriesRepository.find({
+      where: { parent: IsNull() },
+      relations: { children: true },
+    });
+  }
+}
