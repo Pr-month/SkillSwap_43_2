@@ -59,5 +59,5 @@ export class User {
   role!: string;
 
   @Column({ nullable: true })
-  refreshToken!: string;
+  refreshToken!: string | null;
 }
