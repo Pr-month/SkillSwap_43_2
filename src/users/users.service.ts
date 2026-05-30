@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, UnauthorizedException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { appConfig } from 'src/config/app.config';
@@ -15,8 +20,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @Inject(appConfig.KEY)
     private readonly config: AppConfig,
-  ) { }
-
+  ) {}
 
   async create(data: Partial<User>): Promise<User> {
     const user = this.usersRepository.create(data);
@@ -54,7 +58,7 @@ export class UsersService {
   }
 
   async clearRefreshToken(id: string): Promise<void> {
-    await this.usersRepository.update({ id }, { refreshToken: null as unknown as string });
+    await this.usersRepository.update({ id }, { refreshToken: null });
   }
 
   async updatePassword(id: string, dto: UpdatePasswordDto): Promise<void> {
