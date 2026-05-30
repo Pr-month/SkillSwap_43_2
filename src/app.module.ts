@@ -8,6 +8,8 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { appConfig } from './config/app.config';
 import { jwtConfig } from './config/jwt.config';
+import { CategoriesModule } from './categories/categories.module';
+import { SkillsModule } from './skills/skills.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { jwtConfig } from './config/jwt.config';
     }),
     UsersModule,
     AuthModule,
+    CategoriesModule,
+    SkillsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
