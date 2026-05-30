@@ -58,7 +58,10 @@ export class UsersService {
   }
 
   async clearRefreshToken(id: string): Promise<void> {
-    await this.usersRepository.update({ id }, { refreshToken: null });
+    await this.usersRepository.update(
+      { id },
+      { refreshToken: null as unknown as string },
+    );
   }
 
   async updatePassword(id: string, dto: UpdatePasswordDto): Promise<void> {
