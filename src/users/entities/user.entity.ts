@@ -5,6 +5,7 @@ import {
   OneToMany,
   ManyToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { Roles, Gender } from '../users.enums';
 import { Skill } from '../../skills/entities/skill.entity';
 
@@ -23,6 +24,7 @@ export class User {
   })
   email: string;
 
+  @Exclude()
   @Column()
   password: string;
 
@@ -53,6 +55,7 @@ export class User {
   @Column({ type: 'enum', enum: Roles, default: Roles.USER })
   role: Roles;
 
+  @Exclude()
   @Column({ nullable: true })
   refreshToken: string | null;
 }
