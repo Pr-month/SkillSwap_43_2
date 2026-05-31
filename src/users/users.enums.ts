@@ -6,4 +6,5 @@ export enum Roles {
 export enum Gender {
   MALE = 'male',
   FEMALE = 'female',
+  UNKNOWN = 'unknown',
 }
