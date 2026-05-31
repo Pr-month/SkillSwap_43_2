@@ -24,7 +24,7 @@ export class Skill {
   @ManyToOne(() => Category, (category) => category.children);
   category: Category;
 
-  @Column({ type: 'simple-array' })
+  @Column('text', { array: true, default: [] })
   images: string[];
 
   @ManyToOne(() => User, (user) => user.skills)
