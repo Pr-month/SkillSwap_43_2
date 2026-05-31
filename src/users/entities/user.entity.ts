@@ -36,8 +36,8 @@ export class User {
   city: string; // здесь теоретически должна быть связь один-к-одному с сущностью "город" из справочника городов
 
   @Column({ type: 'enum', enum: Gender })
-  gender: string;
-
+  gender: Gender;
+  
   @Column()
   avatar: string;
 
@@ -51,7 +51,7 @@ export class User {
   favoriteSkills: Skill[];
 
   @Column({ type: 'enum', enum: Roles, default: Roles.USER })
-  role: string;
+  role: Roles;
 
   @Column({ nullable: true })
   refreshToken: string | null;
