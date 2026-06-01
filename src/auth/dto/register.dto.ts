@@ -29,10 +29,9 @@ export class RegisterDto {
   @IsString()
   about: string;
 
-  @IsString()
-  @IsIn(Object.values(Gender))
-  gender: string;
-
+  @IsEnum(Gender)
+  gender: Gender;
+  
   @IsString()
   avatar: string;
 }
