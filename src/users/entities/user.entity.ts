@@ -8,6 +8,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { Roles, Gender } from '../users.enums';
 import { Skill } from '../../skills/entities/skill.entity';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Entity({
   name: 'users',
@@ -39,18 +40,18 @@ export class User {
 
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;
-  
+
   @Column()
   avatar: string;
 
   @OneToMany(() => Skill, (skill) => skill.owner)
   skills: Skill[];
 
-  @ManyToMany(() => Category, (category) => category.users)
-  wantToLearn: Categories[];
+  @ManyToMany(() => Category)
+  wantToLearn?: Category[];
 
-  @ManyToMany(() => Skill, (skill) => skill.users) 
-  favoriteSkills: Skill[];
+  @ManyToMany(() => Skill)
+  favoriteSkills?: Skill[];
 
   @Column({ type: 'enum', enum: Roles, default: Roles.USER })
   role: Roles;

@@ -27,12 +27,14 @@ export class SkillsService {
       .leftJoinAndSelect('skill.owner', 'user')
       .where('1=1');
 
-    if (mode === Modes.CAN && categories?.length > 0) {
+    if (mode === Modes.CAN && hasCategories) {
       baseQuery.andWhere('category.id IN (:categories)', { categories });
     }
 
-    if (mode === Modes.WANT && categories?.length > 0) {
-      baseQuery.andWhere('user.wantToLearn::text[] && :categories', { categories });
+    if (mode === Modes.WANT && hasCategories) {
+      baseQuery.andWhere('user.wantToLearn::text[] && :categories', {
+        categories,
+      });
     }
 
     if (search) {

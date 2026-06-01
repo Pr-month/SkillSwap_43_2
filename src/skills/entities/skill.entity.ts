@@ -7,6 +7,7 @@ import {
   JoinTable,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Category } from 'src/categories/entities/category.entity';
 
 @Entity({
   name: 'skills',
@@ -21,7 +22,7 @@ export class Skill {
   @Column()
   description: string;
 
-  @ManyToOne(() => Category, (category) => category.children);
+  @ManyToOne(() => Category, (category) => category.children)
   category: Category;
 
   @Column('text', { array: true, default: [] })
@@ -29,8 +30,4 @@ export class Skill {
 
   @ManyToOne(() => User, (user) => user.skills)
   owner: User;
-
-  @ManyToMany(() => User, (user) => user.favoriteSkills)
-  @JoinTable()
-  users: Users[];
 }
