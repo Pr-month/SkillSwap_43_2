@@ -6,6 +6,7 @@ import {
 import { Skill } from './entities/skill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Modes } from './skills.enums';
 
 @Injectable()
 export class SkillsService {
@@ -17,35 +18,46 @@ export class SkillsService {
   async findAll(
     getSkillsDto: GetSkillsDto,
   ): Promise<FilteredSkillsWithPagination> {
-    const { categories, search, gender, location, cursor, limit } =
+    const { categories, search, gender, location, mode, cursor, limit } =
       getSkillsDto;
 
-    const query = this.skillsRepository
+    const baseQuery = this.skillsRepository
       .createQueryBuilder('skill')
       .leftJoinAndSelect('skill.category', 'category')
-      .leftJoinAndSelect('skill.owner', 'user');
+      .leftJoinAndSelect('skill.owner', 'user')
+      .where('1=1');
 
-    query.where('category.id IN (:...categors)', { categories });
+    if (mode === Modes.CAN && categories?.length > 0) {
+      baseQuery.andWhere('category.id IN (:categories)', { categories });
+    }
+
+    if (mode === Modes.WANT && categories?.length > 0) {
+      baseQuery.andWhere('user.wantToLearn::text[] && :categories', { categories });
+    }
 
     if (search) {
-      query.andWhere('skill.title ILIKE :search', { search: `%${search}%` });
+      baseQuery.andWhere('skill.title ILIKE :search', {
+        search: `%${search}%`,
+      });
     }
 
     if (gender) {
-      query.andWhere('user.gender = :gender', { gender });
+      baseQuery.andWhere('user.gender = :gender', { gender });
     }
 
     if (location) {
-      query.andWhere('user.city = :location', { location });
+      baseQuery.andWhere('user.city = :location', { location });
     }
+
+    const firstQuery = baseQuery;
 
     if (cursor) {
-      query.andWhere('skill.id > :cursor', { cursor });
+      firstQuery.andWhere('skill.id > :cursor', { cursor });
     }
 
-    query.orderBy('skill.id', 'ASC').limit(limit);
+    firstQuery.orderBy('skill.id', 'ASC').limit(limit);
 
-    const data = await query.getMany();
+    const data = await firstQuery.getMany();
 
     const transformedData = data.map((item) => ({
       user: {
@@ -63,19 +75,14 @@ export class SkillsService {
     }));
 
     let hasNextPage = false;
+    const secondQuery = baseQuery;
+
     if (data.length === limit) {
-      const nextCheck = await this.skillsRepository
-        .createQueryBuilder('skill')
-        .leftJoin('skill.category', 'category')
-        .leftJoin('skill.owner', 'owner')
-        .where('category.id IN (:...categories)', { categories })
-        .andWhere('skill.title ILIKE :search', { search: `%${search}%` })
-        .andWhere('owner.gender = :gender', { gender })
-        .andWhere('owner.city = :location', { location })
+      secondQuery
         .andWhere('skill.id > :lastId', { lastId: data[data.length - 1].id })
-        .orderBy('skill.id', 'ASC')
-        .take(1)
-        .getOne();
+        .orderBy('skill.id', 'ASC');
+
+      const nextCheck = await secondQuery.take(1).getOne();
 
       hasNextPage = !!nextCheck;
     }
