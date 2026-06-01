@@ -1,5 +1,9 @@
-import { Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  Inject,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { appConfig } from 'src/config/app.config';
@@ -7,6 +11,7 @@ import { Repository } from 'typeorm';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { AppConfig } from '../config/app.config';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +19,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     @Inject(appConfig.KEY)
-    private readonly appConfiguration: ConfigType<typeof appConfig>,
+    private readonly config: AppConfig,
   ) {}
 
   async create(data: Partial<User>): Promise<User> {
@@ -53,7 +58,10 @@ export class UsersService {
   }
 
   async clearRefreshToken(id: string): Promise<void> {
-    await this.usersRepository.update({ id }, { refreshToken: null as unknown as string });
+    await this.usersRepository.update(
+      { id },
+      { refreshToken: null as unknown as string },
+    );
   }
 
   async updatePassword(id: string, dto: UpdatePasswordDto): Promise<void> {
@@ -68,7 +76,7 @@ export class UsersService {
     const isMatch = await bcrypt.compare(dto.oldPassword, user.password);
     if (!isMatch) throw new UnauthorizedException('Old password is incorrect');
 
-    user.password = await bcrypt.hash(dto.newPassword, this.appConfiguration.hashSalt);
+    user.password = await bcrypt.hash(dto.newPassword, this.config.hashSalt);
     await this.usersRepository.save(user);
   }
 }

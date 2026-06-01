@@ -22,7 +22,7 @@ import { IAuthorizedRequest } from '../../src/auth/auth.types';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -41,7 +41,7 @@ export class UsersController {
   }
 
   @Patch('me')
-  @UseGuards(JwtAuthGuard) // эта гарда уже создана другим участником, и я не стала создавать дубль
+  @UseGuards(JwtAuthGuard)
   async update(
     @Req()
     req: Request & {
@@ -54,7 +54,6 @@ export class UsersController {
     const id = req.user.sub;
     return await this.usersService.update(id, updateUserDto);
   }
-
 
   @Patch('me/password')
   @UseGuards(JwtAuthGuard)
