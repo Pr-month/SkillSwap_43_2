@@ -1,26 +1,96 @@
 import { Injectable } from '@nestjs/common';
-import { CreateSkillDto } from './dto/create-skill.dto';
-import { UpdateSkillDto } from './dto/update-skill.dto';
+import {
+  GetSkillsDto,
+  FilteredSkillsWithPagination,
+} from './dto/get-skills.dto';
+import { Skill } from './entities/skill.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Modes } from './skills.enums';
 
 @Injectable()
 export class SkillsService {
-  create(createSkillDto: CreateSkillDto) {
-    return 'This action adds a new skill';
-  }
+  constructor(
+    @InjectRepository(Skill)
+    private readonly skillsRepository: Repository<Skill>,
+  ) {}
 
-  findAll() {
-    return `This action returns all skills`;
-  }
+  async findAll(
+    getSkillsDto: GetSkillsDto,
+  ): Promise<FilteredSkillsWithPagination> {
+    const { categories, search, gender, location, mode, cursor, limit } =
+      getSkillsDto;
 
-  findOne(id: number) {
-    return `This action returns a #${id} skill`;
-  }
+    const baseQuery = this.skillsRepository
+      .createQueryBuilder('skill')
+      .leftJoinAndSelect('skill.category', 'category')
+      .leftJoinAndSelect('skill.owner', 'user')
+      .where('1=1');
 
-  update(id: number, updateSkillDto: UpdateSkillDto) {
-    return `This action updates a #${id} skill`;
-  }
+    if (mode === Modes.CAN && categories?.length > 0) {
+      baseQuery.andWhere('category.id IN (:categories)', { categories });
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} skill`;
+    if (mode === Modes.WANT && categories?.length > 0) {
+      baseQuery.andWhere('user.wantToLearn::text[] && :categories', { categories });
+    }
+
+    if (search) {
+      baseQuery.andWhere('skill.title ILIKE :search', {
+        search: `%${search}%`,
+      });
+    }
+
+    if (gender) {
+      baseQuery.andWhere('user.gender = :gender', { gender });
+    }
+
+    if (location) {
+      baseQuery.andWhere('user.city = :location', { location });
+    }
+
+    const firstQuery = baseQuery;
+
+    if (cursor) {
+      firstQuery.andWhere('skill.id > :cursor', { cursor });
+    }
+
+    firstQuery.orderBy('skill.id', 'ASC').limit(limit);
+
+    const data = await firstQuery.getMany();
+
+    const transformedData = data.map((item) => ({
+      user: {
+        id: item.owner.id,
+        name: item.owner.name,
+        wantToLearn: item.owner.wantToLearn,
+        city: item.owner.city,
+        birthdate: item.owner.birthdate,
+        avatar: item.owner.avatar,
+      },
+      skill: {
+        title: item.title,
+        category: item.category.id,
+      },
+    }));
+
+    let hasNextPage = false;
+    const secondQuery = baseQuery;
+
+    if (data.length === limit) {
+      secondQuery
+        .andWhere('skill.id > :lastId', { lastId: data[data.length - 1].id })
+        .orderBy('skill.id', 'ASC');
+
+      const nextCheck = await secondQuery.take(1).getOne();
+
+      hasNextPage = !!nextCheck;
+    }
+
+    return {
+      data: transformedData,
+      hasNextPage,
+      nextCursor: hasNextPage ? data[data.length - 1].id : '',
+    };
   }
 }
