@@ -7,7 +7,7 @@ import {
   IsString,
   ArrayNotEmpty,
 } from 'class-validator';
-import { Gender } from '../../utils/types';
+import { Gender } from '../users.enums';
 
 export class CreateUserDto {
   @IsString()

@@ -18,14 +18,15 @@ import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { IAuthorizedRequest } from '../../src/auth/auth.types';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  getMe(@Req() req: Request & { user: { sub: string } }) {
+  getMe(@Req() req: IAuthorizedRequest) {
     return this.usersService.findById(req.user.sub);
   }
 
@@ -40,7 +41,7 @@ export class UsersController {
   }
 
   @Patch('me')
-  @UseGuards(JwtAuthGuard) // эта гарда уже создана другим участником, и я не стала создавать дубль
+  @UseGuards(JwtAuthGuard)
   async update(
     @Req()
     req: Request & {
@@ -53,7 +54,6 @@ export class UsersController {
     const id = req.user.sub;
     return await this.usersService.update(id, updateUserDto);
   }
-
 
   @Patch('me/password')
   @UseGuards(JwtAuthGuard)

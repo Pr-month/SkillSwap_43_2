@@ -2,10 +2,12 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  // OneToMany,
-  // ManyToMany,
+  OneToMany,
+  ManyToMany,
 } from 'typeorm';
-import { Roles, Gender } from '../../utils/types';
+import { Exclude } from 'class-transformer';
+import { Roles, Gender } from '../users.enums';
+import { Skill } from '../../skills/entities/skill.entity';
 
 @Entity({
   name: 'users',
@@ -22,6 +24,7 @@ export class User {
   })
   email: string;
 
+  @Exclude()
   @Column()
   password: string;
 
@@ -35,29 +38,24 @@ export class User {
   city: string; // здесь теоретически должна быть связь один-к-одному с сущностью "город" из справочника городов
 
   @Column({ type: 'enum', enum: Gender })
-  gender: string;
-
+  gender: Gender;
+  
   @Column()
   avatar: string;
 
-  @Column('simple-array')
-  skills: string[];
-  // @OneToMany(() => Skill, (skill) => skill.owner)
-  // skills: Skill[];
+  @OneToMany(() => Skill, (skill) => skill.owner)
+  skills: Skill[];
 
-  @Column('simple-array')
-  wantToLearn: string[];
-  // @ManyToMany(() => Category, (category) => category.id) // в сущности Category использовать @JoinTable()
-  // wantToLearn: Categories[];
+  @ManyToMany(() => Category, (category) => category.users)
+  wantToLearn: Categories[];
 
-  @Column('simple-array')
-  favoriteSkills: string[];
-  // @ManyToMany(() => Skill, (skill) => skill.id) // в сущности Skill использовать @JoinTable()
-  // favoriteSkills: Skill[];
+  @ManyToMany(() => Skill, (skill) => skill.users) 
+  favoriteSkills: Skill[];
 
-  @Column({ type: 'enum', enum: Roles, default: Roles.user })
-  role: string;
+  @Column({ type: 'enum', enum: Roles, default: Roles.USER })
+  role: Roles;
 
-  @Column()
-  refreshToken: string;
+  @Exclude()
+  @Column({ nullable: true })
+  refreshToken: string | null;
 }
