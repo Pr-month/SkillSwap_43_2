@@ -5,7 +5,9 @@ import {
   Length,
   MinLength,
   ArrayNotEmpty,
+  IsDateString,
 } from 'class-validator';
+import { Gender } from '../../users/users.enums';
 
 export class RegisterDto {
   @IsString()
@@ -24,4 +26,16 @@ export class RegisterDto {
 
   @ArrayNotEmpty()
   wantToLearn: string[];
+  
+  @IsDateString()
+  birthdate: string;
+
+  @IsString()
+  about: string;
+
+  @IsEnum(Gender)
+  gender: Gender;
+  
+  @IsString()
+  avatar: string;
 }
