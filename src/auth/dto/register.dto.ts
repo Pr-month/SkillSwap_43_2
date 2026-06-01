@@ -4,6 +4,7 @@ import {
   IsString,
   Length,
   MinLength,
+  ArrayNotEmpty,
   IsDateString,
 } from 'class-validator';
 import { Gender } from '../../users/users.enums';
@@ -23,6 +24,9 @@ export class RegisterDto {
   @MinLength(6)
   password: string;
 
+  @ArrayNotEmpty()
+  wantToLearn: string[];
+  
   @IsDateString()
   birthdate: string;
 
