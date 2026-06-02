@@ -10,6 +10,7 @@ import { appConfig } from './config/app.config';
 import { jwtConfig } from './config/jwt.config';
 import { CategoriesModule } from './categories/categories.module';
 import { SkillsModule } from './skills/skills.module';
+import { RequestsModule } from './requests/requests.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { SkillsModule } from './skills/skills.module';
     AuthModule,
     CategoriesModule,
     SkillsModule,
+    RequestsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
