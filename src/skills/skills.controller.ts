@@ -20,11 +20,6 @@ import {
 export class SkillsController {
   constructor(private readonly skillsService: SkillsService) {}
 
-  @Post()
-  create(@Body() createSkillDto: CreateSkillDto) {
-    return this.skillsService.create(createSkillDto);
-  }
-
   @Get()
   async findAll(
     @Query() getSkillsDto: GetSkillsDto,
