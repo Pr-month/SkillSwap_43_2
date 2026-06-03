@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -11,9 +12,9 @@ import { CategoriesService } from './categories.service';
 import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { RequireRoles } from 'src/auth/decorators/roles.decorator';
+import { RequireRoles } from '../auth/decorators/roles.decorator';
 import { Roles } from 'src/users/users.enums';
 
 @Controller('categories')
@@ -40,5 +41,12 @@ export class CategoriesController {
     @Body() dto: UpdateCategoryDto,
   ): Promise<Category> {
     return this.categoriesService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @RequireRoles(Roles.ADMIN)
+  async remove(@Param('id') id: string): Promise<void> {
+    return this.categoriesService.remove(id);
   }
 }

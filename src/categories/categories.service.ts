@@ -21,7 +21,6 @@ export class CategoriesService {
 
   async create(dto: CreateCategoryDto): Promise<Category> {
     const category = this.categoriesRepository.create({ name: dto.name });
-
     if (dto.parentId) {
       const parent = await this.categoriesRepository.findOne({
         where: { id: dto.parentId },
@@ -31,22 +30,17 @@ export class CategoriesService {
       }
       category.parent = parent;
     }
-
     return this.categoriesRepository.save(category);
   }
 
   async update(id: string, dto: UpdateCategoryDto): Promise<Category> {
-    const category = await this.categoriesRepository.findOne({
-      where: { id },
-    });
+    const category = await this.categoriesRepository.findOne({ where: { id } });
     if (!category) {
       throw new NotFoundException('Category not found');
     }
-
     if (dto.name) {
       category.name = dto.name;
     }
-
     if (dto.parentId) {
       const parent = await this.categoriesRepository.findOne({
         where: { id: dto.parentId },
@@ -56,7 +50,14 @@ export class CategoriesService {
       }
       category.parent = parent;
     }
-
     return this.categoriesRepository.save(category);
+  }
+
+  async remove(id: string): Promise<void> {
+    const category = await this.categoriesRepository.findOne({ where: { id } });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    await this.categoriesRepository.remove(category);
   }
 }
