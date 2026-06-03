@@ -6,6 +6,7 @@ import {
   IsDateString,
   IsString,
   ArrayNotEmpty,
+  IsEnum,
 } from 'class-validator';
 import { Gender } from '../users.enums';
 
@@ -32,8 +33,8 @@ export class CreateUserDto {
   city: string;
 
   @IsString()
-  @IsIn(Object.values(Gender))
-  gender: string;
+  @IsEnum(Gender)
+  gender: Gender;
 
   @IsString()
   avatar: string;
