@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
@@ -7,19 +7,51 @@ import { Skill } from './entities/skill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Modes } from './skills.enums';
+import { User } from '../users/entities/user.entity';
+import { Category } from '../categories/entities/category.entity';
+import { CreateSkillDto } from './dto/create-skill.dto';
 
 @Injectable()
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
     private readonly skillsRepository: Repository<Skill>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    @InjectRepository(Category)
+    private readonly categoriesRepository: Repository<Category>,
   ) {}
+
+  async create(ownerId: string, dto: CreateSkillDto): Promise<Skill> {
+    const owner = await this.usersRepository.findOne({ where: { id: ownerId } });
+    if (!owner) {
+      throw new NotFoundException('User not found');
+    }
+
+    const category = await this.categoriesRepository.findOne({
+      where: { id: dto.categoryId },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    const skill = this.skillsRepository.create({
+      title: dto.title,
+      description: dto.description,
+      images: dto.images ?? [],
+      owner,
+      category,
+    });
+
+    return this.skillsRepository.save(skill);
+  }
 
   async findAll(
     getSkillsDto: GetSkillsDto,
   ): Promise<FilteredSkillsWithPagination> {
     const { categories, search, gender, location, mode, cursor, limit } =
       getSkillsDto;
+    const hasCategories = (categories?.length ?? 0) > 0;
 
     const baseQuery = this.skillsRepository
       .createQueryBuilder('skill')
@@ -65,10 +97,10 @@ export class SkillsService {
       user: {
         id: item.owner.id,
         name: item.owner.name,
-        wantToLearn: item.owner.wantToLearn,
+        wantToLearn: item.owner.wantToLearn?.map((category) => category.id) ?? [],
         city: item.owner.city,
         birthdate: item.owner.birthdate,
-        avatar: item.owner.avatar,
+        avatar: item.owner.avatar ?? null,
       },
       skill: {
         title: item.title,
