@@ -1,9 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
   Delete,
   Query,
@@ -23,5 +20,10 @@ export class SkillsController {
     @Query() getSkillsDto: GetSkillsDto,
   ): Promise<FilteredSkillsWithPagination> {
     return this.skillsService.findAll(getSkillsDto);
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string): Promise<void> {
+    return this.skillsService.remove(id);
   }
 }

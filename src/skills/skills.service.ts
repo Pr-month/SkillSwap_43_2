@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
@@ -94,5 +94,17 @@ export class SkillsService {
       hasNextPage,
       nextCursor: hasNextPage ? data[data.length - 1].id : '',
     };
+  }
+
+  async remove(id: string): Promise<void> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    await this.skillsRepository.remove(skill);
   }
 }
