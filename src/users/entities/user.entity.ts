@@ -39,7 +39,7 @@ export class User {
 
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;
-  
+
   @Column()
   avatar: string;
 
@@ -49,7 +49,7 @@ export class User {
   @ManyToMany(() => Category, (category) => category.users)
   wantToLearn: Categories[];
 
-  @ManyToMany(() => Skill, (skill) => skill.users) 
+  @ManyToMany(() => Skill, (skill) => skill.users)
   favoriteSkills: Skill[];
 
   @Column({ type: 'enum', enum: Roles, default: Roles.USER })
