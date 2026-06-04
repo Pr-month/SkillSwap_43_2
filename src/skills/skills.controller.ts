@@ -4,12 +4,16 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
 import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
 } from '../skills/dto/get-skills.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { IAuthorizedRequest } from '../auth/auth.types';
 
 @Controller('skills')
 export class SkillsController {
@@ -23,7 +27,11 @@ export class SkillsController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<void> {
-    return this.skillsService.remove(id);
+  @UseGuards(JwtAuthGuard)
+  async remove(
+    @Param('id') id: string,
+    @Req() req: IAuthorizedRequest,
+  ): Promise<void> {
+    return this.skillsService.remove(id, req.user.sub);
   }
 }
