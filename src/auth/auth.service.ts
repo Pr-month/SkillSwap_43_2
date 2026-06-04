@@ -53,7 +53,7 @@ export class AuthService {
     const payload: TJwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role as Roles,
+      role: user.role,
     };
 
     const tokens = await this.generateTokens(payload);
@@ -80,7 +80,7 @@ export class AuthService {
     const payload: TJwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role as Roles,
+      role: user.role,
     };
 
     const tokens = await this.generateTokens(payload);
@@ -102,7 +102,7 @@ export class AuthService {
     const newPayload: TJwtPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role as Roles,
+      role: user.role,
     };
 
     const tokens = await this.generateTokens(newPayload);
