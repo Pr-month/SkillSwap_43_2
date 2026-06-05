@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
@@ -10,6 +14,7 @@ import { Modes } from './skills.enums';
 import { User } from '../users/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
 import { CreateSkillDto } from './dto/create-skill.dto';
+import { UpdateSkillDto } from './dto/update-skill.dto';
 
 @Injectable()
 export class SkillsService {
@@ -126,5 +131,61 @@ export class SkillsService {
       hasNextPage,
       nextCursor: hasNextPage ? data[data.length - 1].id : '',
     };
+  }
+
+  async findOne(id: string): Promise<Skill> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+      relations: { owner: true, category: true },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    return skill;
+  }
+
+  async update(
+    id: string,
+    ownerId: string,
+    dto: UpdateSkillDto,
+  ): Promise<Skill> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+      relations: { owner: true, category: true },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    if (skill.owner.id !== ownerId) {
+      throw new ForbiddenException('You can update only your own skill');
+    }
+
+    if (dto.categoryId) {
+      const category = await this.categoriesRepository.findOne({
+        where: { id: dto.categoryId },
+      });
+      if (!category) {
+        throw new NotFoundException('Category not found');
+      }
+      skill.category = category;
+    }
+
+    if (dto.title !== undefined) {
+      skill.title = dto.title;
+    }
+
+    if (dto.description !== undefined) {
+      skill.description = dto.description;
+    }
+
+    if (dto.images !== undefined) {
+      skill.images = dto.images;
+    }
+
+    return this.skillsRepository.save(skill);
   }
 }

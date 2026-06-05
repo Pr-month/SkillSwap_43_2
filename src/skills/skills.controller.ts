@@ -2,8 +2,11 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Query,
+  Param,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -14,7 +17,6 @@ import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
 } from '../skills/dto/get-skills.dto';
-import { CreateSkillDto } from './dto/create-skill.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { IAuthorizedRequest } from '../auth/auth.types';
 import { Skill } from './entities/skill.entity';
@@ -45,12 +47,17 @@ export class SkillsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
-    return this.skillsService.update(+id, updateSkillDto);
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Req() req: IAuthorizedRequest,
+    @Body() updateSkillDto: UpdateSkillDto,
+  ) {
+    return this.skillsService.update(id, req.user.sub, updateSkillDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.skillsService.remove(+id);
+    return this.skillsService.remove(id);
   }
 }
