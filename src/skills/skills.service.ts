@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
@@ -51,7 +51,7 @@ export class SkillsService {
   ): Promise<FilteredSkillsWithPagination> {
     const { categories, search, gender, location, mode, cursor, limit } =
       getSkillsDto;
-    const hasCategories = (categories?.length ?? 0) > 0;
+    const hasCategories = Array.isArray(categories) && categories.length > 0;
 
     const baseQuery = this.skillsRepository
       .createQueryBuilder('skill')
@@ -97,7 +97,9 @@ export class SkillsService {
       user: {
         id: item.owner.id,
         name: item.owner.name,
-        wantToLearn: item.owner.wantToLearn?.map((category) => category.id) ?? [],
+        wantToLearn: (item.owner.wantToLearn ?? []).map((category) =>
+          typeof category === 'string' ? category : category.id,
+        ),
         city: item.owner.city,
         birthdate: item.owner.birthdate,
         avatar: item.owner.avatar ?? null,
@@ -126,5 +128,22 @@ export class SkillsService {
       hasNextPage,
       nextCursor: hasNextPage ? data[data.length - 1].id : '',
     };
+  }
+
+  async remove(id: string, ownerId: string): Promise<void> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+      relations: { owner: true },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    if (skill.owner.id !== ownerId) {
+      throw new ForbiddenException('You can only delete your own skill');
+    }
+
+    await this.skillsRepository.remove(skill);
   }
 }

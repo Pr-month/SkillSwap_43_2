@@ -1,6 +1,11 @@
 import {
   Controller,
   Get,
+  Param,
+  Delete,
+  Query,
+  UseGuards,
+  Req,
   Post,
   Body,
   Query,
@@ -14,6 +19,8 @@ import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
 } from '../skills/dto/get-skills.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { IAuthorizedRequest } from '../auth/auth.types';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { IAuthorizedRequest } from '../auth/auth.types';
@@ -50,7 +57,12 @@ export class SkillsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.skillsService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  async remove(
+    @Param('id') id: string,
+    @Req() req: IAuthorizedRequest,
+  ): Promise<void> {
+    return this.skillsService.remove(id, req.user.sub);
   }
+}
 }
