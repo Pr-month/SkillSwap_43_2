@@ -3,6 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Status } from '../requests.enums';
@@ -18,21 +20,24 @@ export class Request {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @ManyToOne(() => User, (user) => user.id)
   sender: User;
 
-  @Column()
+  @ManyToOne(() => User, (user) => user.id)
   receiver: User;
 
-  @Column({ type: 'enum', enum: Status })
+  @Column({ type: 'enum', enum: Status, default: Status.PENDING })
   status: Status;
 
-  @Column()
+  @ManyToOne(() => Skill, (skill) => skill.id)
   offeredSkill: Skill;
 
-  @Column()
+  @ManyToOne(() => Skill, (skill) => skill.id)
   requestedSkill: Skill;
 
-  @Column()
+  @Column({ default: false })
   isRead: boolean;
 }
