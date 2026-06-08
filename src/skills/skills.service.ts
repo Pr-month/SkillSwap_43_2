@@ -64,6 +64,7 @@ export class SkillsService {
       .createQueryBuilder('skill')
       .leftJoinAndSelect('skill.category', 'category')
       .leftJoinAndSelect('skill.owner', 'user')
+      .leftJoinAndSelect('user.wantToLearn', 'wantToLearn')
       .where('1=1');
 
     if (mode === Modes.CAN && hasCategories) {
