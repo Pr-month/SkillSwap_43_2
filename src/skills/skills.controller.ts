@@ -6,6 +6,7 @@ import {
   Query,
   Req,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
@@ -52,5 +53,19 @@ export class SkillsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.skillsService.remove(+id);
+  }
+
+  @Patch('fsvorites/:id')
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Req()
+    req: Request & {
+      user: {
+        sub: string;
+      };
+    },
+  ) {
+    return this.skillsService.favoriteSkill(id, req.user.sub);
   }
 }

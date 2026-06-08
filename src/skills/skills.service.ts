@@ -23,7 +23,9 @@ export class SkillsService {
   ) {}
 
   async create(ownerId: string, dto: CreateSkillDto): Promise<Skill> {
-    const owner = await this.usersRepository.findOne({ where: { id: ownerId } });
+    const owner = await this.usersRepository.findOne({
+      where: { id: ownerId },
+    });
     if (!owner) {
       throw new NotFoundException('User not found');
     }
@@ -44,6 +46,25 @@ export class SkillsService {
     });
 
     return this.skillsRepository.save(skill);
+  }
+
+  async favoriteSkill(skillId: string, ownerId: string): Promise<User> {
+    const favoriteSkill = await this.skillsRepository.findOne({
+      where: { id: skillId },
+    });
+    if (!favoriteSkill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    const owner = await this.usersRepository.findOne({
+      where: { id: ownerId },
+    });
+    if (!owner) {
+      throw new NotFoundException('User not found');
+    }
+    owner.favoriteSkills?.push(favoriteSkill);
+
+    return await this.usersRepository.save(owner);
   }
 
   async findAll(
@@ -97,7 +118,8 @@ export class SkillsService {
       user: {
         id: item.owner.id,
         name: item.owner.name,
-        wantToLearn: item.owner.wantToLearn?.map((category) => category.id) ?? [],
+        wantToLearn:
+          item.owner.wantToLearn?.map((category) => category.id) ?? [],
         city: item.owner.city,
         birthdate: item.owner.birthdate,
         avatar: item.owner.avatar ?? null,
