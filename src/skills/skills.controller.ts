@@ -60,7 +60,7 @@ export class SkillsController {
   update(
     @Param('id') id: string,
     @Req()
-    req: Request & {
+    req: IAuthorizedRequest & {
       user: {
         sub: string;
       };
