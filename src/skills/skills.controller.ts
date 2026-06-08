@@ -9,9 +9,13 @@ import {
   Param,
   Req,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import { CreateSkillDto } from './dto/create-skill.dto';
-import { GetSkillsDto, FilteredSkillsWithPagination } from './dto/get-skills.dto';
+import {
+  GetSkillsDto,
+  FilteredSkillsWithPagination,
+} from './dto/get-skills.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { IAuthorizedRequest } from '../auth/auth.types';
@@ -20,7 +24,7 @@ import { SkillsService } from './skills.service';
 
 @Controller('skills')
 export class SkillsController {
-  constructor(private readonly skillsService: SkillsService) { }
+  constructor(private readonly skillsService: SkillsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -60,5 +64,19 @@ export class SkillsController {
     @Req() req: IAuthorizedRequest,
   ): Promise<void> {
     return this.skillsService.remove(id, req.user.sub);
+  }
+
+  @Patch('fsvorites/:id')
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Req()
+    req: IAuthorizedRequest & {
+      user: {
+        sub: string;
+      };
+    },
+  ) {
+    return this.skillsService.favoriteSkill(id, req.user.sub);
   }
 }

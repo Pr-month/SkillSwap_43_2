@@ -23,7 +23,7 @@ export class AuthService {
     private readonly appConfiguration: AppConfig,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: JwtConfig,
-  ) {}
+  ) { }
 
   private async generateTokens(payload: TJwtPayload) {
     const accessToken = await this.jwtService.signAsync(payload, {
@@ -74,6 +74,7 @@ export class AuthService {
 
     const user = await this.usersService.create({
       ...dto,
+      wantToLearn: [], //Заглушка, так как в dto приходит массив строк, их нужно собрать в массив категорий
       password: hashedPassword,
     });
 

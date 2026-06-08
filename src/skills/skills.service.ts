@@ -53,6 +53,25 @@ export class SkillsService {
     return this.skillsRepository.save(skill);
   }
 
+  async favoriteSkill(skillId: string, ownerId: string): Promise<User> {
+    const favoriteSkill = await this.skillsRepository.findOne({
+      where: { id: skillId },
+    });
+    if (!favoriteSkill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    const owner = await this.usersRepository.findOne({
+      where: { id: ownerId },
+    });
+    if (!owner) {
+      throw new NotFoundException('User not found');
+    }
+    owner.favoriteSkills?.push(favoriteSkill);
+
+    return await this.usersRepository.save(owner);
+  }
+
   async findAll(
     getSkillsDto: GetSkillsDto,
   ): Promise<FilteredSkillsWithPagination> {
