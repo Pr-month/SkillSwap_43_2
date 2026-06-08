@@ -11,7 +11,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CreateSkillDto } from './dto/create-skill.dto';
-import { GetSkillsDto, FilteredSkillsWithPagination } from './dto/get-skills.dto';
+import {
+  GetSkillsDto,
+  FilteredSkillsWithPagination,
+} from './dto/get-skills.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { IAuthorizedRequest } from '../auth/auth.types';
@@ -20,7 +23,7 @@ import { SkillsService } from './skills.service';
 
 @Controller('skills')
 export class SkillsController {
-  constructor(private readonly skillsService: SkillsService) { }
+  constructor(private readonly skillsService: SkillsService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)

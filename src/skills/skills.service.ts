@@ -28,7 +28,9 @@ export class SkillsService {
   ) {}
 
   async create(ownerId: string, dto: CreateSkillDto): Promise<Skill> {
-    const owner = await this.usersRepository.findOne({ where: { id: ownerId } });
+    const owner = await this.usersRepository.findOne({
+      where: { id: ownerId },
+    });
     if (!owner) {
       throw new NotFoundException('User not found');
     }
