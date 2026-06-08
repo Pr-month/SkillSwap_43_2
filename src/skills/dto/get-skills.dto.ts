@@ -47,7 +47,10 @@ export type FilteredSkillsWithPagination = {
     user: {
       id: string;
       name: string;
-      wantToLearn: string[];
+      wantToLearn: {
+        id: string;
+        name: string;
+      }[];
       city: string;
       birthdate: string;
       avatar: string | null;
