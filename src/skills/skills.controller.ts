@@ -9,6 +9,7 @@ import {
   Param,
   Req,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import {
@@ -63,5 +64,19 @@ export class SkillsController {
     @Req() req: IAuthorizedRequest,
   ): Promise<void> {
     return this.skillsService.remove(id, req.user.sub);
+  }
+
+  @Patch('fsvorites/:id')
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Req()
+    req: IAuthorizedRequest & {
+      user: {
+        sub: string;
+      };
+    },
+  ) {
+    return this.skillsService.favoriteSkill(id, req.user.sub);
   }
 }
