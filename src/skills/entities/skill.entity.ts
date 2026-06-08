@@ -1,13 +1,6 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  ManyToMany,
-  JoinTable,
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Category } from 'src/categories/entities/category.entity';
+import { Category } from '../../categories/entities/category.entity';
 
 @Entity({
   name: 'skills',

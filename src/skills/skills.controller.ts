@@ -2,23 +2,25 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Query,
+  Param,
   Req,
   UseGuards,
   Param,
 } from '@nestjs/common';
-import { SkillsService } from './skills.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
-import { UpdateSkillDto } from './dto/update-skill.dto';
 import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
-} from '../skills/dto/get-skills.dto';
-import { CreateSkillDto } from './dto/create-skill.dto';
+} from './dto/get-skills.dto';
+import { UpdateSkillDto } from './dto/update-skill.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { IAuthorizedRequest } from '../auth/auth.types';
 import { Skill } from './entities/skill.entity';
+import { SkillsService } from './skills.service';
 
 @Controller('skills')
 export class SkillsController {
@@ -42,17 +44,26 @@ export class SkillsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.skillsService.findOne(+id);
+    // return this.skillsService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
-    return this.skillsService.update(+id, updateSkillDto);
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Req() req: IAuthorizedRequest,
+    @Body() updateSkillDto: UpdateSkillDto,
+  ) {
+    return this.skillsService.update(id, req.user.sub, updateSkillDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.skillsService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  async remove(
+    @Param('id') id: string,
+    @Req() req: IAuthorizedRequest,
+  ): Promise<void> {
+    return this.skillsService.remove(id, req.user.sub);
   }
 
   @Patch('fsvorites/:id')
