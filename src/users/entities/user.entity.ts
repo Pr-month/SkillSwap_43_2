@@ -20,9 +20,7 @@ export class User {
   @Column()
   name: string;
 
-  @Column({
-    unique: true,
-  })
+  @Column({ unique: true })
   email: string;
 
   @Exclude()
@@ -36,7 +34,7 @@ export class User {
   birthdate: string;
 
   @Column()
-  city: string; // здесь теоретически должна быть связь один-к-одному с сущностью "город" из справочника городов
+  city: string;
 
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;

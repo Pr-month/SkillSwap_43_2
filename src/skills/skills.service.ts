@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   GetSkillsDto,
   FilteredSkillsWithPagination,
@@ -7,19 +11,54 @@ import { Skill } from './entities/skill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Modes } from './skills.enums';
+import { User } from '../users/entities/user.entity';
+import { Category } from '../categories/entities/category.entity';
+import { CreateSkillDto } from './dto/create-skill.dto';
+import { UpdateSkillDto } from './dto/update-skill.dto';
 
 @Injectable()
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
     private readonly skillsRepository: Repository<Skill>,
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+    @InjectRepository(Category)
+    private readonly categoriesRepository: Repository<Category>,
   ) {}
+
+  async create(ownerId: string, dto: CreateSkillDto): Promise<Skill> {
+    const owner = await this.usersRepository.findOne({
+      where: { id: ownerId },
+    });
+    if (!owner) {
+      throw new NotFoundException('User not found');
+    }
+
+    const category = await this.categoriesRepository.findOne({
+      where: { id: dto.categoryId },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    const skill = this.skillsRepository.create({
+      title: dto.title,
+      description: dto.description,
+      images: dto.images ?? [],
+      owner,
+      category,
+    });
+
+    return this.skillsRepository.save(skill);
+  }
 
   async findAll(
     getSkillsDto: GetSkillsDto,
   ): Promise<FilteredSkillsWithPagination> {
     const { categories, search, gender, location, mode, cursor, limit } =
       getSkillsDto;
+    const hasCategories = Array.isArray(categories) && categories.length > 0;
 
     const baseQuery = this.skillsRepository
       .createQueryBuilder('skill')
@@ -65,10 +104,12 @@ export class SkillsService {
       user: {
         id: item.owner.id,
         name: item.owner.name,
-        wantToLearn: item.owner.wantToLearn,
+        wantToLearn: (item.owner.wantToLearn ?? []).map((category) =>
+          typeof category === 'string' ? category : category.id,
+        ),
         city: item.owner.city,
         birthdate: item.owner.birthdate,
-        avatar: item.owner.avatar,
+        avatar: item.owner.avatar ?? null,
       },
       skill: {
         title: item.title,
@@ -94,5 +135,78 @@ export class SkillsService {
       hasNextPage,
       nextCursor: hasNextPage ? data[data.length - 1].id : '',
     };
+  }
+
+  async findOne(id: string): Promise<Skill> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+      relations: { owner: true, category: true },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    return skill;
+  }
+
+  async update(
+    id: string,
+    ownerId: string,
+    dto: UpdateSkillDto,
+  ): Promise<Skill> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+      relations: { owner: true, category: true },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    if (skill.owner.id !== ownerId) {
+      throw new ForbiddenException('You can update only your own skill');
+    }
+
+    if (dto.categoryId) {
+      const category = await this.categoriesRepository.findOne({
+        where: { id: dto.categoryId },
+      });
+      if (!category) {
+        throw new NotFoundException('Category not found');
+      }
+      skill.category = category;
+    }
+
+    if (dto.title !== undefined) {
+      skill.title = dto.title;
+    }
+
+    if (dto.description !== undefined) {
+      skill.description = dto.description;
+    }
+
+    if (dto.images !== undefined) {
+      skill.images = dto.images;
+    }
+
+    return this.skillsRepository.save(skill);
+  }
+
+  async remove(id: string, ownerId: string): Promise<void> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+      relations: { owner: true },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    if (skill.owner.id !== ownerId) {
+      throw new ForbiddenException('You can only delete your own skill');
+    }
+
+    await this.skillsRepository.remove(skill);
   }
 }

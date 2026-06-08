@@ -6,12 +6,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { appConfig } from 'src/config/app.config';
+import { appConfig, AppConfig } from 'src/config/app.config';
 import { Repository } from 'typeorm';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { AppConfig } from '../config/app.config';
+import { CategoriesService } from '../categories/categories.service';
 
 @Injectable()
 export class UsersService {
@@ -20,10 +20,20 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @Inject(appConfig.KEY)
     private readonly config: AppConfig,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
-  async create(data: Partial<User>): Promise<User> {
-    const user = this.usersRepository.create(data);
+  async create(
+    data: Partial<User> & { wantToLearn?: string[] },
+  ): Promise<User> {
+    const { wantToLearn, ...rest } = data;
+
+    const user = this.usersRepository.create(rest);
+
+    if (wantToLearn && wantToLearn.length > 0) {
+      user.wantToLearn = await this.categoriesService.findByIds(wantToLearn);
+    }
+
     return this.usersRepository.save(user);
   }
 
@@ -46,7 +56,14 @@ export class UsersService {
         `Невозможно обновить данные: пользователь с id ${id} не найден`,
       );
     }
-    return this.usersRepository.save({ ...user, ...updateUserDto });
+
+    const { wantToLearn, ...rest } = updateUserDto;
+
+    if (wantToLearn && wantToLearn.length > 0) {
+      user.wantToLearn = await this.categoriesService.findByIds(wantToLearn);
+    }
+
+    return this.usersRepository.save({ ...user, ...rest });
   }
 
   async findByEmail(email: string): Promise<User | null> {
