@@ -55,6 +55,6 @@ export class User {
   role: Roles;
 
   @Exclude()
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   refreshToken: string | null;
 }
