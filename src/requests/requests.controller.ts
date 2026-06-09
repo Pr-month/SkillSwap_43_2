@@ -6,23 +6,37 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Request as Req,
 } from '@nestjs/common';
 import { RequestsService } from './requests.service';
-import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { IAuthorizedRequest } from '../auth/auth.types';
 
 @Controller('requests')
 export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
   @Post()
-  create(@Body() createRequestDto: CreateRequestDto) {
-    return this.requestsService.create(createRequestDto);
+  create() {
+    return this.requestsService.create();
   }
 
   @Get()
   findAll() {
     return this.requestsService.findAll();
+  }
+
+  @Get('incoming')
+  @UseGuards(JwtAuthGuard)
+  async findIncoming(@Req() req: IAuthorizedRequest) {
+    return this.requestsService.findIncoming(req.user.sub);
+  }
+
+  @Get('outgoing')
+  @UseGuards(JwtAuthGuard)
+  async findOutgoing(@Req() req: IAuthorizedRequest) {
+    return this.requestsService.findOutgoing(req.user.sub);
   }
 
   @Get(':id')
@@ -31,8 +45,8 @@ export class RequestsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRequestDto: UpdateRequestDto) {
-    return this.requestsService.update(+id, updateRequestDto);
+  update(@Param('id') id: string) {
+    return this.requestsService.update(+id);
   }
 
   @Delete(':id')
