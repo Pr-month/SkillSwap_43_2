@@ -36,12 +36,21 @@ export class RequestsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRequestDto: UpdateRequestDto) {
-    return this.requestsService.update(+id, updateRequestDto);
+  @UseGuards(JwtAuthGuard)
+  update(
+    @Param('id') id: string,
+    @Body() updateRequestDto: UpdateRequestDto,
+    @Req() req: IAuthorizedRequest,
+  ) {
+    return this.requestsService.update(+id, updateRequestDto, req.user.sub);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.requestsService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  async remove(
+    @Param('id') id: string,
+    @Req() req: IAuthorizedRequest,
+  ): Promise<void> {
+    return this.requestsService.remove(id, req.user.sub);
   }
 }

@@ -10,7 +10,7 @@ import { Request } from './entities/request.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Skill } from '../skills/entities/skill.entity';
-import { NotFoundError } from 'rxjs';
+import { Roles } from '../users/users.enums';
 
 @Injectable()
 export class RequestsService {
@@ -77,11 +77,59 @@ export class RequestsService {
     return `This action returns a #${id} request`;
   }
 
-  update(id: number, updateRequestDto: UpdateRequestDto) {
-    return `This action updates a #${id} request`;
+  async update(
+    id: string,
+    updateRequestDto: UpdateRequestDto,
+    userId: string,
+  ): Promise<Request> {
+    const request = await this.requestsRepository.findOne({
+      where: { id },
+      relations: {
+        receiver: true,
+      },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Request not found');
+    }
+
+    if (request.receiver.id !== userId) {
+      throw new ForbiddenException('You can update only incoming requests');
+    }
+
+    request.status = updateRequestDto.status;
+
+    return this.requestsRepository.save(request);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} request`;
+  async remove(requestId: string, userId: string) {
+    const request = await this.requestsRepository.findOne({
+      where: { id: requestId },
+      relations: {
+        sender: true,
+      },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Request not found');
+    }
+
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Current user not found');
+    }
+
+    const isAdmin = (user.role = Roles.ADMIN);
+
+    if (!isAdmin && request.sender.id !== userId) {
+      throw new ForbiddenException(
+        'You can delete only your own outgoing requests',
+      );
+    }
+
+    await this.requestsRepository.remove(request);
   }
 }
