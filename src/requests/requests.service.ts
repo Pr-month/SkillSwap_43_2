@@ -10,6 +10,7 @@ import { Request } from './entities/request.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Skill } from '../skills/entities/skill.entity';
+import { Status } from './requests.enums';
 import { Roles } from '../users/users.enums';
 
 @Injectable()
@@ -71,6 +72,21 @@ export class RequestsService {
 
   findAll() {
     return `This action returns all requests`;
+  }
+
+  async findIncoming(userId: string): Promise<Request[]> {
+    return this.requestsRepository.find({
+      where: [
+        { receiver: { id: userId }, status: Status.PENDING },
+        { receiver: { id: userId }, status: Status.INPROGRESS },
+      ],
+      relations: {
+        sender: true,
+        receiver: true,
+        offeredSkill: true,
+        requestedSkill: true,
+      },
+    });
   }
 
   findOne(id: number) {
