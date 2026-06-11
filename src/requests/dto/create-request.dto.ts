@@ -1,1 +1,5 @@
-export class CreateRequestDto {}
+export class CreateRequestDto {
+  offeredSkillId: string;
+
+  requestedSkillId: string;
+}
