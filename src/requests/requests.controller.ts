@@ -12,8 +12,8 @@ import {
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { IAuthorizedRequest } from 'src/auth/auth.types';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { IAuthorizedRequest } from '../auth/auth.types';
 
 @Controller('requests')
 export class RequestsController {
@@ -28,6 +28,12 @@ export class RequestsController {
   @Get()
   findAll() {
     return this.requestsService.findAll();
+  }
+
+  @Get('incoming')
+  @UseGuards(JwtAuthGuard)
+  async findIncoming(@Req() req: IAuthorizedRequest) {
+    return this.requestsService.findIncoming(req.user.sub);
   }
 
   @Get(':id')
