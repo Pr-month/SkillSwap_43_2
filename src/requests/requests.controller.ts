@@ -36,6 +36,12 @@ export class RequestsController {
     return this.requestsService.findIncoming(req.user.sub);
   }
 
+  @Get('outgoing')
+  @UseGuards(JwtAuthGuard)
+  async findOutgoing(@Req() req: IAuthorizedRequest) {
+    return this.requestsService.findOutgoing(req.user.sub);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.requestsService.findOne(+id);

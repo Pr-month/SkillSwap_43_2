@@ -89,6 +89,21 @@ export class RequestsService {
     });
   }
 
+  async findOutgoing(userId: string): Promise<Request[]> {
+    return this.requestsRepository.find({
+      where: [
+        { sender: { id: userId }, status: Status.PENDING },
+        { sender: { id: userId }, status: Status.INPROGRESS },
+      ],
+      relations: {
+        sender: true,
+        receiver: true,
+        offeredSkill: true,
+        requestedSkill: true,
+      },
+    });
+  }
+
   findOne(id: number) {
     return `This action returns a #${id} request`;
   }
