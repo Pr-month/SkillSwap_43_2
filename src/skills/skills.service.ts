@@ -9,7 +9,7 @@ import {
 } from './dto/get-skills.dto';
 import { Skill } from './entities/skill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In, ArrayContains } from 'typeorm';
 import { Modes } from './skills.enums';
 import { User } from '../users/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
@@ -70,6 +70,27 @@ export class SkillsService {
     owner.favoriteSkills?.push(favoriteSkill);
 
     return await this.usersRepository.save(owner);
+  }
+
+  async unfavoriteSkill(id: string, ownerId: string): Promise<User> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    const owner = await this.usersRepository.findOne({
+      where: { id: ownerId, favoriteSkills: ArrayContains([skill]) },
+    });
+
+    if (!owner) {
+      throw new NotFoundException('User not found');
+    }
+    const skillIndex: number = owner.favoriteSkills.indexOf(skill);
+    owner.favoriteSkills?.splice(skillIndex, 1);
+    return await this.skillsRepository.save(owner);
   }
 
   async findAll(
