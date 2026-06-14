@@ -68,7 +68,7 @@ export class SkillsController {
 
   @Patch('favorites/:id')
   @UseGuards(JwtAuthGuard)
-  update(
+  favoriteSkill(
     @Param('id') id: string,
     @Req()
     req: IAuthorizedRequest & {
@@ -82,14 +82,10 @@ export class SkillsController {
 
   @Delete('favorites/:id')
   @UseGuards(JwtAuthGuard)
-  update(
+  unfavoriteSkill(
     @Param('id') id: string,
     @Req()
-    req: IAuthorizedRequest & {
-      user: {
-        sub: string;
-      };
-    },
+    req: IAuthorizedRequest & {},
   ) {
     return this.skillsService.unfavoriteSkill(id, req.user.sub);
   }

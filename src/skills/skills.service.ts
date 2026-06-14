@@ -82,15 +82,21 @@ export class SkillsService {
     }
 
     const owner = await this.usersRepository.findOne({
-      where: { id: ownerId, favoriteSkills: ArrayContains([skill]) },
+      where: { id: ownerId },
+      relations: { favoriteSkills: true },
     });
 
     if (!owner) {
       throw new NotFoundException('User not found');
     }
-    const skillIndex: number = owner.favoriteSkills.indexOf(skill);
+    const skillIndex: number = owner.favoriteSkills.findIndex(
+      (element) => element.id === skill.id,
+    );
+    if (!skillIndex) {
+      throw new NotFoundException('Skill not found');
+    }
     owner.favoriteSkills?.splice(skillIndex, 1);
-    return await this.skillsRepository.save(owner);
+    return await this.usersRepository.save(owner);
   }
 
   async findAll(
