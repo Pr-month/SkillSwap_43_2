@@ -7,6 +7,7 @@ import {
 import { WsException } from '@nestjs/websockets';
 import { JwtService } from '@nestjs/jwt';
 import { JwtConfig, jwtConfig } from '../../config/jwt.config';
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class JwtSocketGuard implements CanActivate {
@@ -18,7 +19,7 @@ export class JwtSocketGuard implements CanActivate {
 
   canActivate(context: ExecutionContext) {
     try {
-      const client = context.switchToWs().getClient();
+      const client: Socket = context.switchToWs().getClient();
       const token: string = client.handshake?.query?.token;
       if (!token) {
         throw new WsException('Missing authentication token');
