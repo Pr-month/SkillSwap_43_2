@@ -44,7 +44,7 @@ export class RequestsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.requestsService.findOne(+id);
+    return this.requestsService.findOne(id);
   }
 
   @Patch(':id')
@@ -54,7 +54,7 @@ export class RequestsController {
     @Body() updateRequestDto: UpdateRequestDto,
     @Req() req: IAuthorizedRequest,
   ) {
-    return this.requestsService.update(+id, updateRequestDto, req.user.sub);
+    return this.requestsService.update(id, updateRequestDto, req.user.sub);
   }
 
   @Delete(':id')
