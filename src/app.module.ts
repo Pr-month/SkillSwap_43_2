@@ -11,6 +11,8 @@ import { jwtConfig } from './config/jwt.config';
 import { CategoriesModule } from './categories/categories.module';
 import { SkillsModule } from './skills/skills.module';
 import { RequestsModule } from './requests/requests.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { NotificationsProvider } from './notifications/notifications-gateway';
 
 @Module({
   imports: [
@@ -34,8 +36,9 @@ import { RequestsModule } from './requests/requests.module';
     CategoriesModule,
     SkillsModule,
     RequestsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, NotificationsProvider],
 })
 export class AppModule {}
