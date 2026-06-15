@@ -10,7 +10,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { MimeTypes, FileSizes } from './files.enums';
+import { FileSizes } from './files.enums';
 
 @Controller('files')
 export class FilesController {
@@ -18,7 +18,7 @@ export class FilesController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads',
+        destination: './public/uploads',
         filename: (req, file, callback) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -36,7 +36,7 @@ export class FilesController {
       new ParseFilePipe({
         validators: [
           new FileTypeValidator({
-            fileType: MimeTypes.GIF || MimeTypes.JPG || MimeTypes.PNG,
+            fileType: /image\/(jpeg|png|gif)/,
           }),
         ],
       }),
