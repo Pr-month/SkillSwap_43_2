@@ -9,7 +9,6 @@ import {
   Param,
   Req,
   UseGuards,
-  Param,
 } from '@nestjs/common';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import {
@@ -43,10 +42,10 @@ export class SkillsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') _id: string) {
     // return this.skillsService.findOne(+id);
   }
-
+  
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   update(
@@ -66,17 +65,9 @@ export class SkillsController {
     return this.skillsService.remove(id, req.user.sub);
   }
 
-  @Patch('fsvorites/:id')
+  @Patch('favorites/:id')
   @UseGuards(JwtAuthGuard)
-  update(
-    @Param('id') id: string,
-    @Req()
-    req: IAuthorizedRequest & {
-      user: {
-        sub: string;
-      };
-    },
-  ) {
+  addToFavorites(@Param('id') id: string, @Req() req: IAuthorizedRequest) {
     return this.skillsService.favoriteSkill(id, req.user.sub);
   }
 }
