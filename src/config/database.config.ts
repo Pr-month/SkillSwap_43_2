@@ -1,9 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import * as dotenv from 'dotenv';
-import { User } from '../users/entities/user.entity';
-import { Category } from '../categories/entities/category.entity';
-import { Skill } from '../skills/entities/skill.entity';
 
 dotenv.config();
 
@@ -15,7 +12,7 @@ const options: DataSourceOptions = {
   password: process.env.DB_PASSWORD ?? 'postgres',
   database: process.env.DB_DATABASE ?? 'skillswap',
   synchronize: process.env.NODE_ENV !== 'production',
-  entities: [User, Category, Skill],
+  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
 };
 
 export const databaseConfig = registerAs(
