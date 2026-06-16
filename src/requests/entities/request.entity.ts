@@ -7,7 +7,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { Status } from '../requests.enums';
+import { RequestStatus } from '../requests.enums';
 import { Skill } from '../../skills/entities/skill.entity';
 
 @Entity({
@@ -29,7 +29,7 @@ export class Request {
   @ManyToOne(() => User, (user) => user.id)
   receiver: User;
 
-  @Column({ type: 'enum', enum: Status, default: Status.PENDING })
+  @Column({ type: 'enum', enum: RequestStatus, default: RequestStatus.NEWREQ })
   status: Status;
 
   @ManyToOne(() => Skill, (skill) => skill.id)

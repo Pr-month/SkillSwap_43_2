@@ -10,8 +10,9 @@ import { Request } from './entities/request.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Skill } from '../skills/entities/skill.entity';
-import { Status } from './requests.enums';
+import { RequestStatus } from './requests.enums';
 import { Roles } from '../users/users.enums';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 
 @Injectable()
 export class RequestsService {
@@ -24,6 +25,7 @@ export class RequestsService {
 
     @InjectRepository(Skill)
     private readonly skillsRepository: Repository<Skill>,
+    private readonly notificationsGateway: NotificationsGateway,
   ) {}
 
   async create(senderId: string, dto: CreateRequestDto): Promise<Request> {
@@ -32,7 +34,7 @@ export class RequestsService {
     });
 
     if (!sender) {
-      throw new NotFoundException('User not found (');
+      throw new NotFoundException('User not found');
     }
 
     const offeredSkill = await this.skillsRepository.findOne({
@@ -67,6 +69,12 @@ export class RequestsService {
       requestedSkill,
     });
 
+    this.notificationsGateway.notifyUser(requestedSkill.owner.id, {
+      notificationType: RequestStatus.NEWREQ,
+      skillName: offeredSkill.title,
+      fromUserId: sender.id,
+      fromUserName: sender.name,
+    });
     return this.requestsRepository.save(request);
   }
 
@@ -77,8 +85,7 @@ export class RequestsService {
   async findIncoming(userId: string): Promise<Request[]> {
     return this.requestsRepository.find({
       where: [
-        { receiver: { id: userId }, status: Status.PENDING },
-        { receiver: { id: userId }, status: Status.INPROGRESS },
+        { receiver: { id: userId }, status: RequestStatus.NEWREQ },
       ],
       relations: {
         sender: true,
@@ -92,8 +99,7 @@ export class RequestsService {
   async findOutgoing(userId: string): Promise<Request[]> {
     return this.requestsRepository.find({
       where: [
-        { sender: { id: userId }, status: Status.PENDING },
-        { sender: { id: userId }, status: Status.INPROGRESS },
+        { sender: { id: userId }, status: RequestStatus.NEWREQ },
       ],
       relations: {
         sender: true,
@@ -130,6 +136,12 @@ export class RequestsService {
 
     request.status = updateRequestDto.status;
 
+    this.notificationsGateway.notifyUser(request.sender.id, {
+      notificationType: updateRequestDto.status,
+      skillName: request.requestedSkill.title,
+      fromUserId: request.sender.name,
+      fromUserName: request.sender.id,
+    });
     return this.requestsRepository.save(request);
   }
 

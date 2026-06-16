@@ -1,7 +1,6 @@
-export enum Status {
-  PENDING = 'pending',
-  ACCEPTED = 'accepted',
+export enum RequestStatus {
+  NEWREQ = 'new request',
   REJECTED = 'rejected',
-  INPROGRESS = 'inProgress',
-  DONE = 'done',
+  APPROVED = 'approved',
 }
+

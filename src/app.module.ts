@@ -12,7 +12,6 @@ import { CategoriesModule } from './categories/categories.module';
 import { SkillsModule } from './skills/skills.module';
 import { RequestsModule } from './requests/requests.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { NotificationsProvider } from './notifications/notifications-gateway';
 
 @Module({
   imports: [
@@ -39,6 +38,6 @@ import { NotificationsProvider } from './notifications/notifications-gateway';
     NotificationsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, NotificationsProvider],
+  providers: [AppService],
 })
 export class AppModule {}
