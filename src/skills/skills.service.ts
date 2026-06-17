@@ -67,7 +67,8 @@ export class SkillsService {
     if (!owner) {
       throw new NotFoundException('User not found');
     }
-    owner.favoriteSkills?.push(favoriteSkill);
+    owner.favoriteSkills = owner.favoriteSkills ?? [];
+    owner.favoriteSkills.push(favoriteSkill);
 
     return await this.usersRepository.save(owner);
   }
@@ -89,13 +90,15 @@ export class SkillsService {
     if (!owner) {
       throw new NotFoundException('User not found');
     }
-    const skillIndex: number = owner.favoriteSkills.findIndex(
+    const favoriteSkills = owner.favoriteSkills ?? [];
+    const skillIndex: number = favoriteSkills.findIndex(
       (element) => element.id === skill.id,
     );
-    if (!skillIndex) {
+    if (skillIndex === -1) {
       throw new NotFoundException('Skill not found');
     }
-    owner.favoriteSkills?.splice(skillIndex, 1);
+    favoriteSkills.splice(skillIndex, 1);
+    owner.favoriteSkills = favoriteSkills;
     return await this.usersRepository.save(owner);
   }
 
@@ -151,7 +154,7 @@ export class SkillsService {
       user: {
         id: item.owner.id,
         name: item.owner.name,
-        wantToLearn: item.owner.wantToLearn.map((category) => {
+        wantToLearn: (item.owner.wantToLearn ?? []).map((category) => {
           return { id: category.id, name: category.name };
         }),
         city: item.owner.city,

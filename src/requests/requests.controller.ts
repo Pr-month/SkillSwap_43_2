@@ -54,7 +54,7 @@ export class RequestsController {
     @Body() updateRequestDto: UpdateRequestDto,
     @Req() req: IAuthorizedRequest,
   ) {
-    return this.requestsService.update(+id, updateRequestDto, req.user.sub);
+    return this.requestsService.update(id, updateRequestDto, req.user.sub);
   }
 
   @Delete(':id')
