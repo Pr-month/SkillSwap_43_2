@@ -9,7 +9,6 @@ import {
   Param,
   Req,
   UseGuards,
-  Param,
 } from '@nestjs/common';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import {
