@@ -9,7 +9,6 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtConfig, jwtConfig } from '../../config/jwt.config';
 import { Socket } from 'socket.io';
 import { TJwtPayload } from '../auth.types';
-import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class JwtSocketGuard implements CanActivate {
@@ -17,7 +16,6 @@ export class JwtSocketGuard implements CanActivate {
     private jwtService: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: JwtConfig,
-    private usersService: UsersService,
   ) {}
 
   async canActivate(context: ExecutionContext) {
@@ -32,9 +30,7 @@ export class JwtSocketGuard implements CanActivate {
       const payload: TJwtPayload = this.jwtService.verify(token, {
         secret: this.jwtConfiguration.secret,
       });
-      const user = await this.usersService.findById(payload.sub);
-
-      return user ? true : false;
+      return true;
     } catch {
       throw new WsException('Invalid token');
     }
