@@ -9,7 +9,7 @@ import {
 } from './dto/get-skills.dto';
 import { Skill } from './entities/skill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, ArrayContains } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Modes } from './skills.enums';
 import { User } from '../users/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
@@ -89,7 +89,7 @@ export class SkillsService {
     if (!owner) {
       throw new NotFoundException('User not found');
     }
-    const skillIndex: number = owner.favoriteSkills.findIndex(
+    const skillIndex: number | undefined = owner.favoriteSkills?.findIndex(
       (element) => element.id === skill.id,
     );
     if (!skillIndex) {
@@ -151,9 +151,10 @@ export class SkillsService {
       user: {
         id: item.owner.id,
         name: item.owner.name,
-        wantToLearn: item.owner.wantToLearn.map((category) => {
-          return { id: category.id, name: category.name };
-        }),
+        wantToLearn:
+          item.owner.wantToLearn?.map((category) => {
+            return { id: category.id, name: category.name };
+          }) ?? [],
         city: item.owner.city,
         birthdate: item.owner.birthdate,
         avatar: item.owner.avatar ?? null,
