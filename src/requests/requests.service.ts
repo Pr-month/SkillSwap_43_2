@@ -110,7 +110,7 @@ export class RequestsService {
     });
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} request`;
   }
 
@@ -165,7 +165,7 @@ export class RequestsService {
       throw new NotFoundException('Current user not found');
     }
 
-    const isAdmin = (user.role = Roles.ADMIN);
+    const isAdmin = user.role === Roles.ADMIN;
 
     if (!isAdmin && request.sender.id !== userId) {
       throw new ForbiddenException(

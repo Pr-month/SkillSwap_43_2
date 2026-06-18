@@ -11,6 +11,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshJwtAuthGuard } from './guards/refresh-jwt-auth.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy';
+import { JwtSocketGuard } from './guards/ws-jwt.guard';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { RefreshJwtStrategy } from './strategies/refresh-jwt.strategy';
     RefreshJwtStrategy,
     JwtAuthGuard,
     RefreshJwtAuthGuard,
+    JwtSocketGuard,
   ],
   exports: [JwtModule],
 })

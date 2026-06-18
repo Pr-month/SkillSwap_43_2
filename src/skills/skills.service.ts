@@ -67,8 +67,38 @@ export class SkillsService {
     if (!owner) {
       throw new NotFoundException('User not found');
     }
-    owner.favoriteSkills?.push(favoriteSkill);
+    owner.favoriteSkills = owner.favoriteSkills ?? [];
+    owner.favoriteSkills.push(favoriteSkill);
 
+    return await this.usersRepository.save(owner);
+  }
+
+  async unfavoriteSkill(id: string, ownerId: string): Promise<User> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    const owner = await this.usersRepository.findOne({
+      where: { id: ownerId },
+      relations: { favoriteSkills: true },
+    });
+
+    if (!owner) {
+      throw new NotFoundException('User not found');
+    }
+    const favoriteSkills = owner.favoriteSkills ?? [];
+    const skillIndex: number | undefined = owner.favoriteSkills?.findIndex(
+      (element) => element.id === skill.id,
+    );
+    if (skillIndex === -1) {
+      throw new NotFoundException('Skill not found');
+    }
+    favoriteSkills.splice(skillIndex, 1);
+    owner.favoriteSkills = favoriteSkills;
     return await this.usersRepository.save(owner);
   }
 
@@ -124,7 +154,7 @@ export class SkillsService {
       user: {
         id: item.owner.id,
         name: item.owner.name,
-        wantToLearn: item.owner.wantToLearn.map((category) => {
+        wantToLearn: (item.owner.wantToLearn ?? []).map((category) => {
           return { id: category.id, name: category.name };
         }),
         city: item.owner.city,
@@ -228,5 +258,28 @@ export class SkillsService {
     }
 
     await this.skillsRepository.remove(skill);
+  }
+  async getSimilar(id: string): Promise<User[]> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+    });
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+    const category = await this.categoriesRepository.findOne({
+      where: {
+        children: ArrayContains([skill]),
+      },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    const similarUsers = await this.usersRepository.find({
+      take: 10,
+      where: {
+        skills: { category },
+      },
+    });
+    return similarUsers;
   }
 }
