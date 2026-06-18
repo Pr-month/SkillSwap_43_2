@@ -9,7 +9,7 @@ import {
 } from './dto/get-skills.dto';
 import { Skill } from './entities/skill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, ArrayContains } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Modes } from './skills.enums';
 import { User } from '../users/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
@@ -91,7 +91,7 @@ export class SkillsService {
       throw new NotFoundException('User not found');
     }
     const favoriteSkills = owner.favoriteSkills ?? [];
-    const skillIndex: number = favoriteSkills.findIndex(
+    const skillIndex: number | undefined = owner.favoriteSkills?.findIndex(
       (element) => element.id === skill.id,
     );
     if (skillIndex === -1) {
@@ -258,5 +258,28 @@ export class SkillsService {
     }
 
     await this.skillsRepository.remove(skill);
+  }
+  async getSimilar(id: string): Promise<User[]> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+    });
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+    const category = await this.categoriesRepository.findOne({
+      where: {
+        children: ArrayContains([skill]),
+      },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    const similarUsers = await this.usersRepository.find({
+      take: 10,
+      where: {
+        skills: { category },
+      },
+    });
+    return similarUsers;
   }
 }

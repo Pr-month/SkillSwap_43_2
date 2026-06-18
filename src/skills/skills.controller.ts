@@ -42,10 +42,10 @@ export class SkillsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') _id: string) {
     // return this.skillsService.findOne(+id);
   }
-
+  
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   update(
@@ -67,18 +67,15 @@ export class SkillsController {
 
   @Patch('favorites/:id')
   @UseGuards(JwtAuthGuard)
-  favoriteSkill(
-    @Param('id') id: string,
-    @Req()
-    req: IAuthorizedRequest & {
-      user: {
-        sub: string;
-      };
-    },
-  ) {
+  addToFavorites(@Param('id') id: string, @Req() req: IAuthorizedRequest) {
     return this.skillsService.favoriteSkill(id, req.user.sub);
   }
 
+  @Get(':id/similar')
+  getSimilar(@Param('id') id: string) {
+    return this.skillsService.getSimilar(id);
+  }
+  
   @Delete('favorites/:id')
   @UseGuards(JwtAuthGuard)
   unfavoriteSkill(
