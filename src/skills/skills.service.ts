@@ -256,4 +256,27 @@ export class SkillsService {
 
     await this.skillsRepository.remove(skill);
   }
+  async getSimilar(id: string): Promise<User[]> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+    });
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+    const category = await this.categoriesRepository.findOne({
+      where: {
+        children: ArrayContains([skill]),
+      },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    const similarUsers = await this.usersRepository.find({
+      take: 10,
+      where: {
+        skills: { category },
+      },
+    });
+    return similarUsers;
+  }
 }
