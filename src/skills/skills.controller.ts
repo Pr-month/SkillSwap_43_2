@@ -66,9 +66,9 @@ export class SkillsController {
     return this.skillsService.remove(id, req.user.sub);
   }
 
-  @Patch('fsvorites/:id')
+  @Patch('favorites/:id')
   @UseGuards(JwtAuthGuard)
-  update(
+  favoriteSkill(
     @Param('id') id: string,
     @Req()
     req: IAuthorizedRequest & {
@@ -83,5 +83,15 @@ export class SkillsController {
   @Get(':id/similar')
   getSimilar(@Param('id') id: string) {
     return this.skillsService.getSimilar(id);
+  }
+  
+  @Delete('favorites/:id')
+  @UseGuards(JwtAuthGuard)
+  unfavoriteSkill(
+    @Param('id') id: string,
+    @Req()
+    req: IAuthorizedRequest & {},
+  ) {
+    return this.skillsService.unfavoriteSkill(id, req.user.sub);
   }
 }

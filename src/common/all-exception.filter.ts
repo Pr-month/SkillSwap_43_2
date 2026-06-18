@@ -27,7 +27,7 @@ export class AllExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof PayloadTooLargeException) {
       return response.status(HttpStatus.PAYLOAD_TOO_LARGE).json({
-        message: 'File too large',
+        message: 'File is too large',
       });
     }
 

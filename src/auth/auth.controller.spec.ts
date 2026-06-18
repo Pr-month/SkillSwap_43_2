@@ -75,7 +75,9 @@ describe('AuthController', () => {
         role: Roles.USER,
       },
     } as any;
-    authServiceMock.logout.mockResolvedValue({ message: 'Logged out successfully' });
+    authServiceMock.logout.mockResolvedValue({
+      message: 'Logged out successfully',
+    });
 
     const result = await controller.logout(req);
 
@@ -98,7 +100,10 @@ describe('AuthController', () => {
 
     const result = await controller.refresh(req, 'incoming-refresh-token');
 
-    expect(authServiceMock.refresh).toHaveBeenCalledWith(req.user, 'incoming-refresh-token');
+    expect(authServiceMock.refresh).toHaveBeenCalledWith(
+      req.user,
+      'incoming-refresh-token',
+    );
     expect(result).toEqual({
       accessToken: 'new-access-token',
       refreshToken: 'new-refresh-token',
