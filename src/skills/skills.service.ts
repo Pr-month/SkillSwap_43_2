@@ -9,7 +9,7 @@ import {
 } from './dto/get-skills.dto';
 import { Skill } from './entities/skill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In, ArrayContains } from 'typeorm';
 import { Modes } from './skills.enums';
 import { User } from '../users/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
@@ -69,6 +69,33 @@ export class SkillsService {
     }
     owner.favoriteSkills?.push(favoriteSkill);
 
+    return await this.usersRepository.save(owner);
+  }
+
+  async unfavoriteSkill(id: string, ownerId: string): Promise<User> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+    });
+
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+
+    const owner = await this.usersRepository.findOne({
+      where: { id: ownerId },
+      relations: { favoriteSkills: true },
+    });
+
+    if (!owner) {
+      throw new NotFoundException('User not found');
+    }
+    const skillIndex: number = owner.favoriteSkills.findIndex(
+      (element) => element.id === skill.id,
+    );
+    if (!skillIndex) {
+      throw new NotFoundException('Skill not found');
+    }
+    owner.favoriteSkills?.splice(skillIndex, 1);
     return await this.usersRepository.save(owner);
   }
 
@@ -228,5 +255,28 @@ export class SkillsService {
     }
 
     await this.skillsRepository.remove(skill);
+  }
+  async getSimilar(id: string): Promise<User[]> {
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+    });
+    if (!skill) {
+      throw new NotFoundException('Skill not found');
+    }
+    const category = await this.categoriesRepository.findOne({
+      where: {
+        children: ArrayContains([skill]),
+      },
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+    const similarUsers = await this.usersRepository.find({
+      take: 10,
+      where: {
+        skills: { category },
+      },
+    });
+    return similarUsers;
   }
 }

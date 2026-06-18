@@ -70,4 +70,19 @@ export class SkillsController {
   addToFavorites(@Param('id') id: string, @Req() req: IAuthorizedRequest) {
     return this.skillsService.favoriteSkill(id, req.user.sub);
   }
+
+  @Get(':id/similar')
+  getSimilar(@Param('id') id: string) {
+    return this.skillsService.getSimilar(id);
+  }
+  
+  @Delete('favorites/:id')
+  @UseGuards(JwtAuthGuard)
+  unfavoriteSkill(
+    @Param('id') id: string,
+    @Req()
+    req: IAuthorizedRequest & {},
+  ) {
+    return this.skillsService.unfavoriteSkill(id, req.user.sub);
+  }
 }
