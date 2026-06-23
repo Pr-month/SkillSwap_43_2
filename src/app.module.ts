@@ -11,6 +11,8 @@ import { jwtConfig } from './config/jwt.config';
 import { CategoriesModule } from './categories/categories.module';
 import { SkillsModule } from './skills/skills.module';
 import { RequestsModule } from './requests/requests.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { RequestsModule } from './requests/requests.module';
     CategoriesModule,
     SkillsModule,
     RequestsModule,
+    NotificationsModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

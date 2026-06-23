@@ -42,7 +42,7 @@ export class SkillsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') _id: string) {
     // return this.skillsService.findOne(+id);
   }
 
@@ -63,5 +63,26 @@ export class SkillsController {
     @Req() req: IAuthorizedRequest,
   ): Promise<void> {
     return this.skillsService.remove(id, req.user.sub);
+  }
+
+  @Patch('favorites/:id')
+  @UseGuards(JwtAuthGuard)
+  addToFavorites(@Param('id') id: string, @Req() req: IAuthorizedRequest) {
+    return this.skillsService.favoriteSkill(id, req.user.sub);
+  }
+
+  @Get(':id/similar')
+  getSimilar(@Param('id') id: string) {
+    return this.skillsService.getSimilar(id);
+  }
+
+  @Delete('favorites/:id')
+  @UseGuards(JwtAuthGuard)
+  unfavoriteSkill(
+    @Param('id') id: string,
+    @Req()
+    req: IAuthorizedRequest & {},
+  ) {
+    return this.skillsService.unfavoriteSkill(id, req.user.sub);
   }
 }

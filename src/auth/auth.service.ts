@@ -23,7 +23,7 @@ export class AuthService {
     private readonly appConfiguration: AppConfig,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: JwtConfig,
-  ) { }
+  ) {}
 
   private async generateTokens(payload: TJwtPayload) {
     const accessToken = await this.jwtService.signAsync(payload, {
