@@ -58,7 +58,10 @@ describe('UsersService', () => {
       const categories = [{ id: 'cat-1' }, { id: 'cat-2' }];
       usersRepositoryMock.create.mockReturnValue(createdUser);
       categoriesServiceMock.findByIds.mockResolvedValue(categories);
-      usersRepositoryMock.save.mockResolvedValue({ ...createdUser, wantToLearn: categories });
+      usersRepositoryMock.save.mockResolvedValue({
+        ...createdUser,
+        wantToLearn: categories,
+      });
 
       const result = await service.create({
         email: 'john@test.dev',
@@ -68,7 +71,10 @@ describe('UsersService', () => {
       expect(usersRepositoryMock.create).toHaveBeenCalledWith({
         email: 'john@test.dev',
       });
-      expect(categoriesServiceMock.findByIds).toHaveBeenCalledWith(['cat-1', 'cat-2']);
+      expect(categoriesServiceMock.findByIds).toHaveBeenCalledWith([
+        'cat-1',
+        'cat-2',
+      ]);
       expect(usersRepositoryMock.save).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'user-1',
@@ -171,9 +177,9 @@ describe('UsersService', () => {
     it('throws NotFoundException when trying to update missing user', async () => {
       usersRepositoryMock.findOne.mockResolvedValue(null);
 
-      await expect(service.update('missing', { name: 'Name' })).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.update('missing', { name: 'Name' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
@@ -221,7 +227,9 @@ describe('UsersService', () => {
 
       await service.updatePassword('user-7', dto);
 
-      expect(usersRepositoryMock.createQueryBuilder).toHaveBeenCalledWith('user');
+      expect(usersRepositoryMock.createQueryBuilder).toHaveBeenCalledWith(
+        'user',
+      );
       expect(queryBuilderMock.addSelect).toHaveBeenCalledWith('user.password');
       expect(queryBuilderMock.where).toHaveBeenCalledWith('user.id = :id', {
         id: 'user-7',
@@ -238,9 +246,9 @@ describe('UsersService', () => {
       usersRepositoryMock.createQueryBuilder.mockReturnValue(queryBuilderMock);
       queryBuilderMock.getOne.mockResolvedValue(null);
 
-      await expect(service.updatePassword('missing-user', dto)).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.updatePassword('missing-user', dto),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('throws UnauthorizedException when old password does not match', async () => {
@@ -249,9 +257,9 @@ describe('UsersService', () => {
       queryBuilderMock.getOne.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.updatePassword('user-8', dto)).rejects.toBeInstanceOf(
-        UnauthorizedException,
-      );
+      await expect(
+        service.updatePassword('user-8', dto),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
       expect(bcrypt.hash).not.toHaveBeenCalled();
       expect(usersRepositoryMock.save).not.toHaveBeenCalled();
     });

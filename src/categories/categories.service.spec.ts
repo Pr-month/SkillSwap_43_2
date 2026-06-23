@@ -68,9 +68,13 @@ describe('CategoriesService', () => {
 
       const result = await service.create({ name: 'Backend' });
 
-      expect(categoriesRepositoryMock.create).toHaveBeenCalledWith({ name: 'Backend' });
+      expect(categoriesRepositoryMock.create).toHaveBeenCalledWith({
+        name: 'Backend',
+      });
       expect(categoriesRepositoryMock.findOne).not.toHaveBeenCalled();
-      expect(categoriesRepositoryMock.save).toHaveBeenCalledWith(createdCategory);
+      expect(categoriesRepositoryMock.save).toHaveBeenCalledWith(
+        createdCategory,
+      );
       expect(result).toEqual({ id: 'cat-1', name: 'Backend' });
     });
 
@@ -85,7 +89,10 @@ describe('CategoriesService', () => {
         parent,
       });
 
-      const result = await service.create({ name: 'Node.js', parentId: 'parent-1' });
+      const result = await service.create({
+        name: 'Node.js',
+        parentId: 'parent-1',
+      });
 
       expect(categoriesRepositoryMock.findOne).toHaveBeenCalledWith({
         where: { id: 'parent-1' },
@@ -98,7 +105,9 @@ describe('CategoriesService', () => {
     });
 
     it('throws NotFoundException when parentId is invalid', async () => {
-      categoriesRepositoryMock.create.mockReturnValue({ name: 'Node.js' } as Category);
+      categoriesRepositoryMock.create.mockReturnValue({
+        name: 'Node.js',
+      } as Category);
       categoriesRepositoryMock.findOne.mockResolvedValue(null);
 
       await expect(
@@ -142,9 +151,9 @@ describe('CategoriesService', () => {
     it('throws NotFoundException when category does not exist', async () => {
       categoriesRepositoryMock.findOne.mockResolvedValue(null);
 
-      await expect(service.update('missing-category', { name: 'Any' })).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.update('missing-category', { name: 'Any' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('throws NotFoundException when parent is not found', async () => {

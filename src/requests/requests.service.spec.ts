@@ -29,7 +29,10 @@ describe('RequestsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RequestsService,
-        { provide: getRepositoryToken(Request), useValue: requestsRepositoryMock },
+        {
+          provide: getRepositoryToken(Request),
+          useValue: requestsRepositoryMock,
+        },
         { provide: getRepositoryToken(User), useValue: usersRepositoryMock },
         { provide: getRepositoryToken(Skill), useValue: skillsRepositoryMock },
       ],
@@ -43,7 +46,10 @@ describe('RequestsService', () => {
   });
 
   describe('create', () => {
-    const dto = { offeredSkillId: 'offered-1', requestedSkillId: 'requested-1' };
+    const dto = {
+      offeredSkillId: 'offered-1',
+      requestedSkillId: 'requested-1',
+    };
 
     it('creates request successfully', async () => {
       const sender = { id: 'sender-1' };
@@ -102,7 +108,10 @@ describe('RequestsService', () => {
       usersRepositoryMock.findOne.mockResolvedValue({ id: 'sender-1' });
       skillsRepositoryMock.findOne
         .mockResolvedValueOnce({ id: 'offered-1', owner: { id: 'other-user' } })
-        .mockResolvedValueOnce({ id: 'requested-1', owner: { id: 'receiver-1' } });
+        .mockResolvedValueOnce({
+          id: 'requested-1',
+          owner: { id: 'receiver-1' },
+        });
 
       await expect(service.create('sender-1', dto)).rejects.toBeInstanceOf(
         ForbiddenException,
@@ -113,7 +122,10 @@ describe('RequestsService', () => {
       usersRepositoryMock.findOne.mockResolvedValue({ id: 'sender-1' });
       skillsRepositoryMock.findOne
         .mockResolvedValueOnce({ id: 'offered-1', owner: { id: 'sender-1' } })
-        .mockResolvedValueOnce({ id: 'requested-1', owner: { id: 'sender-1' } });
+        .mockResolvedValueOnce({
+          id: 'requested-1',
+          owner: { id: 'sender-1' },
+        });
 
       await expect(service.create('sender-1', dto)).rejects.toBeInstanceOf(
         ForbiddenException,
@@ -200,7 +212,10 @@ describe('RequestsService', () => {
     });
 
     it('updates request status and saves', async () => {
-      const request = { id: 'request-1', receiver: { id: 'receiver-1' } } as any;
+      const request = {
+        id: 'request-1',
+        receiver: { id: 'receiver-1' },
+      } as any;
       requestsRepositoryMock.findOne.mockResolvedValue(request);
       requestsRepositoryMock.save.mockResolvedValue({
         ...request,
@@ -225,9 +240,9 @@ describe('RequestsService', () => {
     it('throws when request is missing', async () => {
       requestsRepositoryMock.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('request-1', 'sender-1')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.remove('request-1', 'sender-1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('throws when current user is missing', async () => {
@@ -237,9 +252,9 @@ describe('RequestsService', () => {
       });
       usersRepositoryMock.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('request-1', 'sender-1')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.remove('request-1', 'sender-1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('throws when non-admin tries to remove foreign request', async () => {
@@ -252,9 +267,9 @@ describe('RequestsService', () => {
         role: Roles.USER,
       });
 
-      await expect(service.remove('request-1', 'receiver-1')).rejects.toBeInstanceOf(
-        ForbiddenException,
-      );
+      await expect(
+        service.remove('request-1', 'receiver-1'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('removes own request for regular user', async () => {

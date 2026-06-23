@@ -46,7 +46,10 @@ describe('SkillsService', () => {
         SkillsService,
         { provide: getRepositoryToken(Skill), useValue: skillsRepositoryMock },
         { provide: getRepositoryToken(User), useValue: usersRepositoryMock },
-        { provide: getRepositoryToken(Category), useValue: categoriesRepositoryMock },
+        {
+          provide: getRepositoryToken(Category),
+          useValue: categoriesRepositoryMock,
+        },
       ],
     }).compile();
 
@@ -89,9 +92,9 @@ describe('SkillsService', () => {
     it('throws when owner is missing', async () => {
       usersRepositoryMock.findOne.mockResolvedValue(null);
 
-      await expect(service.create('missing-user', dto as any)).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.create('missing-user', dto as any),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('throws when category is missing', async () => {
@@ -122,18 +125,18 @@ describe('SkillsService', () => {
     it('throws when skill is missing', async () => {
       skillsRepositoryMock.findOne.mockResolvedValue(null);
 
-      await expect(service.favoriteSkill('missing-skill', 'user-1')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.favoriteSkill('missing-skill', 'user-1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('throws when user is missing', async () => {
       skillsRepositoryMock.findOne.mockResolvedValue({ id: 'skill-1' });
       usersRepositoryMock.findOne.mockResolvedValue(null);
 
-      await expect(service.favoriteSkill('skill-1', 'missing-user')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.favoriteSkill('skill-1', 'missing-user'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('initializes favorite list when it is undefined', async () => {
@@ -197,9 +200,9 @@ describe('SkillsService', () => {
         favoriteSkills: [{ id: 'skill-1' }],
       });
 
-      await expect(service.unfavoriteSkill('skill-3', 'user-1')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.unfavoriteSkill('skill-3', 'user-1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('throws when favorites list is undefined', async () => {
@@ -208,9 +211,9 @@ describe('SkillsService', () => {
         id: 'user-1',
       });
 
-      await expect(service.unfavoriteSkill('skill-1', 'user-1')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.unfavoriteSkill('skill-1', 'user-1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
@@ -429,7 +432,9 @@ describe('SkillsService', () => {
       categoriesRepositoryMock.findOne.mockResolvedValue(null);
 
       await expect(
-        service.update('skill-1', 'owner-1', { categoryId: 'missing-cat' } as any),
+        service.update('skill-1', 'owner-1', {
+          categoryId: 'missing-cat',
+        } as any),
       ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
@@ -438,9 +443,9 @@ describe('SkillsService', () => {
     it('throws when skill is missing', async () => {
       skillsRepositoryMock.findOne.mockResolvedValue(null);
 
-      await expect(service.remove('missing-skill', 'owner-1')).rejects.toBeInstanceOf(
-        NotFoundException,
-      );
+      await expect(
+        service.remove('missing-skill', 'owner-1'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
 
     it('throws when removing user is not owner', async () => {
@@ -449,9 +454,9 @@ describe('SkillsService', () => {
         owner: { id: 'owner-1' },
       });
 
-      await expect(service.remove('skill-1', 'other-user')).rejects.toBeInstanceOf(
-        ForbiddenException,
-      );
+      await expect(
+        service.remove('skill-1', 'other-user'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('removes skill for owner', async () => {

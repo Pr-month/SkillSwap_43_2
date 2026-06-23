@@ -31,7 +31,10 @@ describe('RequestsController', () => {
 
   it('delegates create to RequestsService with user id', async () => {
     const req = { user: { sub: 'sender-1' } } as any;
-    const dto = { offeredSkillId: 'offered-1', requestedSkillId: 'requested-1' };
+    const dto = {
+      offeredSkillId: 'offered-1',
+      requestedSkillId: 'requested-1',
+    };
     const expected = { id: 'request-1' };
     requestsServiceMock.create.mockResolvedValue(expected);
 
@@ -103,7 +106,10 @@ describe('RequestsController', () => {
 
     const result = await controller.remove('request-4', req);
 
-    expect(requestsServiceMock.remove).toHaveBeenCalledWith('request-4', 'sender-3');
+    expect(requestsServiceMock.remove).toHaveBeenCalledWith(
+      'request-4',
+      'sender-3',
+    );
     expect(result).toBeUndefined();
   });
 });

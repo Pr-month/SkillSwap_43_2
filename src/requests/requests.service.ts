@@ -84,9 +84,7 @@ export class RequestsService {
 
   async findIncoming(userId: string): Promise<Request[]> {
     return this.requestsRepository.find({
-      where: [
-        { receiver: { id: userId }, status: RequestStatus.NEWREQ },
-      ],
+      where: [{ receiver: { id: userId }, status: RequestStatus.NEWREQ }],
       relations: {
         sender: true,
         receiver: true,
@@ -98,9 +96,7 @@ export class RequestsService {
 
   async findOutgoing(userId: string): Promise<Request[]> {
     return this.requestsRepository.find({
-      where: [
-        { sender: { id: userId }, status: RequestStatus.NEWREQ },
-      ],
+      where: [{ sender: { id: userId }, status: RequestStatus.NEWREQ }],
       relations: {
         sender: true,
         receiver: true,

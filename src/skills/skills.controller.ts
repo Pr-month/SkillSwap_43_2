@@ -45,7 +45,7 @@ export class SkillsController {
   findOne(@Param('id') _id: string) {
     // return this.skillsService.findOne(+id);
   }
-  
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   update(
@@ -75,7 +75,7 @@ export class SkillsController {
   getSimilar(@Param('id') id: string) {
     return this.skillsService.getSimilar(id);
   }
-  
+
   @Delete('favorites/:id')
   @UseGuards(JwtAuthGuard)
   unfavoriteSkill(

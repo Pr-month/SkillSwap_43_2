@@ -58,7 +58,11 @@ describe('SkillsController', () => {
 
     const result = await controller.update('skill-2', req, dto as any);
 
-    expect(skillsServiceMock.update).toHaveBeenCalledWith('skill-2', 'owner-2', dto);
+    expect(skillsServiceMock.update).toHaveBeenCalledWith(
+      'skill-2',
+      'owner-2',
+      dto,
+    );
     expect(result).toEqual(expected);
   });
 
@@ -79,7 +83,10 @@ describe('SkillsController', () => {
 
     const result = await controller.favoriteSkill('skill-4', req);
 
-    expect(skillsServiceMock.favoriteSkill).toHaveBeenCalledWith('skill-4', 'user-1');
+    expect(skillsServiceMock.favoriteSkill).toHaveBeenCalledWith(
+      'skill-4',
+      'user-1',
+    );
     expect(result).toEqual(expected);
   });
 
@@ -90,7 +97,10 @@ describe('SkillsController', () => {
 
     const result = await controller.unfavoriteSkill('skill-5', req);
 
-    expect(skillsServiceMock.unfavoriteSkill).toHaveBeenCalledWith('skill-5', 'user-2');
+    expect(skillsServiceMock.unfavoriteSkill).toHaveBeenCalledWith(
+      'skill-5',
+      'user-2',
+    );
     expect(result).toEqual(expected);
   });
 });

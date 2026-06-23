@@ -17,7 +17,9 @@ describe('CategoriesController', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [CategoriesController],
-      providers: [{ provide: CategoriesService, useValue: categoriesServiceMock }],
+      providers: [
+        { provide: CategoriesService, useValue: categoriesServiceMock },
+      ],
     }).compile();
 
     controller = module.get<CategoriesController>(CategoriesController);
@@ -34,7 +36,10 @@ describe('CategoriesController', () => {
 
   it('delegates create with dto', async () => {
     const dto = { name: 'Backend', parentId: 'parent-1' };
-    categoriesServiceMock.create.mockResolvedValue({ id: 'cat-2', name: 'Backend' });
+    categoriesServiceMock.create.mockResolvedValue({
+      id: 'cat-2',
+      name: 'Backend',
+    });
 
     const result = await controller.create(dto);
 
@@ -44,7 +49,10 @@ describe('CategoriesController', () => {
 
   it('delegates update with id and dto', async () => {
     const dto = { name: 'Updated Name' };
-    categoriesServiceMock.update.mockResolvedValue({ id: 'cat-3', name: 'Updated Name' });
+    categoriesServiceMock.update.mockResolvedValue({
+      id: 'cat-3',
+      name: 'Updated Name',
+    });
 
     const result = await controller.update('cat-3', dto);
 
