@@ -9,7 +9,7 @@ import {
 } from './dto/get-skills.dto';
 import { Skill } from './entities/skill.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, ArrayContains } from 'typeorm';
 import { Modes } from './skills.enums';
 import { User } from '../users/entities/user.entity';
 import { Category } from '../categories/entities/category.entity';
