@@ -259,6 +259,7 @@ export class SkillsService {
 
     await this.skillsRepository.remove(skill);
   }
+
   async getSimilar(id: string): Promise<User[]> {
     const skill = await this.skillsRepository.findOne({
       where: { id },
