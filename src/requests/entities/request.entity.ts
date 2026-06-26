@@ -30,7 +30,7 @@ export class Request {
   receiver: User;
 
   @Column({ type: 'enum', enum: RequestStatus, default: RequestStatus.NEWREQ })
-  status: Status;
+  status: RequestStatus;
 
   @ManyToOne(() => Skill, (skill) => skill.id)
   offeredSkill: Skill;
