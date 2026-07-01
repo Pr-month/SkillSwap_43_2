@@ -1,13 +1,23 @@
 import { Injectable } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { City } from './entities/city.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class CitiesService {
+  constructor(
+    @InjectRepository(City)
+    private readonly citiesRepository: Repository<City>,
+  ) {}
+
   create() {
     return 'This action adds a new city';
   }
 
   findAll() {
-    return `This action returns all cities`;
+    return this.citiesRepository.find({
+      take: 10,
+    });
   }
 
   findOne(id: number) {
