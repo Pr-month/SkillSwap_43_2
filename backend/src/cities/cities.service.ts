@@ -1,7 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { City } from './entities/city.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { CreateCityDto } from './dto/create-city.dto';
+import { UpdateCityDto } from './dto/update-city.dto';
 
 @Injectable()
 export class CitiesService {
@@ -10,8 +16,16 @@ export class CitiesService {
     private readonly citiesRepository: Repository<City>,
   ) {}
 
-  create() {
-    return 'This action adds a new city';
+  async create(dto: CreateCityDto): Promise<City> {
+    const existingCity = await this.citiesRepository.findOne({
+      where: { name: dto.name },
+    });
+    if (existingCity) {
+      throw new ConflictException('City with this name already exists');
+    }
+
+    const city = this.citiesRepository.create({ name: dto.name });
+    return this.citiesRepository.save(city);
   }
 
   findAll() {
@@ -24,11 +38,30 @@ export class CitiesService {
     return `This action returns a #${id} city`;
   }
 
-  update(id: number) {
-    return `This action updates a #${id} city`;
+  async update(id: string, dto: UpdateCityDto): Promise<City> {
+    const city = await this.citiesRepository.findOne({ where: { id } });
+    if (!city) {
+      throw new NotFoundException('City not found');
+    }
+
+    if (dto.name && dto.name !== city.name) {
+      const existingCity = await this.citiesRepository.findOne({
+        where: { name: dto.name },
+      });
+      if (existingCity) {
+        throw new ConflictException('City with this name already exists');
+      }
+      city.name = dto.name;
+    }
+
+    return this.citiesRepository.save(city);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} city`;
+  async remove(id: string): Promise<void> {
+    const city = await this.citiesRepository.findOne({ where: { id } });
+    if (!city) {
+      throw new NotFoundException('City not found');
+    }
+    await this.citiesRepository.remove(city);
   }
 }
