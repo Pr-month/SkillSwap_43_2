@@ -25,7 +25,9 @@ describe('CitiesController', () => {
   });
 
   it('delegates findAll to CitiesService', async () => {
-    citiesServiceMock.findAll.mockResolvedValue([{ id: 'city-1', name: 'Moscow' }]);
+    citiesServiceMock.findAll.mockResolvedValue([
+      { id: 'city-1', name: 'Moscow' },
+    ]);
 
     const result = await controller.findAll();
 
