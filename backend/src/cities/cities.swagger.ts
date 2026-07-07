@@ -105,7 +105,8 @@ export function ApiCitiesDelete() {
     ApiBearerAuth('access-token'),
     ApiOperation({
       summary: 'Удаление города',
-      description: 'Удаляет город из базы данных. Доступно только администратору.',
+      description:
+        'Удаляет город из базы данных. Доступно только администратору.',
     }),
     ApiCityIdParam(),
     ApiResponse({ status: 200, description: 'Город удалён' }),

@@ -3,7 +3,6 @@ import { User } from '../../users/entities/user.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-
 @Entity({
   name: 'skills',
 })
