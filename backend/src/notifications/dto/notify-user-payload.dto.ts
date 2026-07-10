@@ -1,7 +1,7 @@
-import { NotificationTypes } from '../notifications.enums';
+import { RequestStatus } from '../../requests/requests.enums';
 
 export class NotifyUserPayloadDto {
-  notificationType: NotificationTypes;
+  notificationType: RequestStatus;
   skillName: string;
   fromUserId: string;
   fromUserName?: string;

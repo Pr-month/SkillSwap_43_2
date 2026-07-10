@@ -91,9 +91,10 @@ export class SkillsService {
       throw new NotFoundException('User not found');
     }
     const favoriteSkills = owner.favoriteSkills ?? [];
-    const skillIndex: number | undefined = owner.favoriteSkills?.findIndex(
-      (element) => element.id === skill.id,
-    );
+    const skillIndex: number =
+      owner.favoriteSkills?.findIndex(
+        (element) => element.id === skill.id,
+      ) ?? -1;
     if (skillIndex === -1) {
       throw new NotFoundException('Skill not found');
     }
@@ -259,6 +260,7 @@ export class SkillsService {
 
     await this.skillsRepository.remove(skill);
   }
+
   async getSimilar(id: string): Promise<User[]> {
     const skill = await this.skillsRepository.findOne({
       where: { id },

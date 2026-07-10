@@ -20,12 +20,24 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { IAuthorizedRequest } from '../auth/auth.types';
 import { Skill } from './entities/skill.entity';
 import { SkillsService } from './skills.service';
+import { ApiTags } from '@nestjs/swagger';
+import {
+  ApiSkillsCreate,
+  ApiSkillsFindAll,
+  ApiSkillsUpdate,
+  ApiSkillsDelete,
+  ApiSkillsAddToFavorites,
+  ApiSkillsDeleteFromFavorites,
+  ApiSkillsGetSimilar,
+} from './skills.swagger';
 
+@ApiTags('users')
 @Controller('skills')
 export class SkillsController {
   constructor(private readonly skillsService: SkillsService) {}
 
   @Post()
+  @ApiSkillsCreate()
   @UseGuards(JwtAuthGuard)
   create(
     @Req() req: IAuthorizedRequest,
@@ -35,18 +47,21 @@ export class SkillsController {
   }
 
   @Get()
+  @ApiSkillsFindAll()
   async findAll(
     @Query() getSkillsDto: GetSkillsDto,
   ): Promise<FilteredSkillsWithPagination> {
     return this.skillsService.findAll(getSkillsDto);
   }
 
+  // после написания эндпойнта добавить декораторы для сваггера
   @Get(':id')
   findOne(@Param('id') _id: string) {
     // return this.skillsService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiSkillsUpdate()
   @UseGuards(JwtAuthGuard)
   update(
     @Param('id') id: string,
@@ -57,6 +72,7 @@ export class SkillsController {
   }
 
   @Delete(':id')
+  @ApiSkillsDelete()
   @UseGuards(JwtAuthGuard)
   async remove(
     @Param('id') id: string,
@@ -66,22 +82,25 @@ export class SkillsController {
   }
 
   @Patch('favorites/:id')
+  @ApiSkillsAddToFavorites()
   @UseGuards(JwtAuthGuard)
   addToFavorites(@Param('id') id: string, @Req() req: IAuthorizedRequest) {
     return this.skillsService.favoriteSkill(id, req.user.sub);
   }
 
   @Get(':id/similar')
+  @ApiSkillsGetSimilar()
   getSimilar(@Param('id') id: string) {
     return this.skillsService.getSimilar(id);
   }
 
   @Delete('favorites/:id')
+  @ApiSkillsDeleteFromFavorites()
   @UseGuards(JwtAuthGuard)
   unfavoriteSkill(
     @Param('id') id: string,
     @Req()
-    req: IAuthorizedRequest & {},
+    req: IAuthorizedRequest,
   ) {
     return this.skillsService.unfavoriteSkill(id, req.user.sub);
   }
