@@ -92,9 +92,8 @@ export class SkillsService {
     }
     const favoriteSkills = owner.favoriteSkills ?? [];
     const skillIndex: number =
-      owner.favoriteSkills?.findIndex(
-        (element) => element.id === skill.id,
-      ) ?? -1;
+      owner.favoriteSkills?.findIndex((element) => element.id === skill.id) ??
+      -1;
     if (skillIndex === -1) {
       throw new NotFoundException('Skill not found');
     }

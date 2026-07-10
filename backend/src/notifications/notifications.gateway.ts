@@ -1,6 +1,7 @@
 import { Injectable, UseGuards, Inject } from '@nestjs/common';
 import {
   WebSocketGateway,
+  WebSocketServer,
   SubscribeMessage,
   WsException,
 } from '@nestjs/websockets';
@@ -16,8 +17,10 @@ import { TJwtPayload } from '../auth/auth.types';
 @WebSocketGateway({ crossOriginIsolated: true })
 @UseGuards(JwtSocketGuard)
 export class NotificationsGateway {
+  @WebSocketServer()
+  private readonly server: Server;
+
   constructor(
-    private readonly server: Server,
     private readonly notificationsService: NotificationsService,
     private jwtService: JwtService,
     @Inject(jwtConfig.KEY)
