@@ -6,10 +6,11 @@ import { User } from './entities/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { CategoriesModule } from '../categories/categories.module';
+import { City } from '../cities/entities/city.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, City]),
     ConfigModule.forFeature(appConfig),
     CategoriesModule,
   ],
