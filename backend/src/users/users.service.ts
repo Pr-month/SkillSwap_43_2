@@ -12,28 +12,35 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { CategoriesService } from '../categories/categories.service';
+import { City } from '../cities/entities/city.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(City)
+    private readonly citiesRepository: Repository<City>,
     @Inject(appConfig.KEY)
     private readonly config: AppConfig,
     private readonly categoriesService: CategoriesService,
   ) {}
 
   async create(
-    data: Partial<User> & { wantToLearn?: string[] },
+    data: Partial<User> & { wantToLearn?: string[]; cityId?: string },
   ): Promise<User> {
-    const { wantToLearn, ...rest } = data;
-
+    const { wantToLearn, cityId, ...rest } = data;
     const user = this.usersRepository.create(rest);
-
     if (wantToLearn && wantToLearn.length > 0) {
       user.wantToLearn = await this.categoriesService.findByIds(wantToLearn);
     }
-
+    if (cityId) {
+      const city = await this.citiesRepository.findOne({
+        where: { id: cityId },
+      });
+      if (!city) throw new NotFoundException('City not found');
+      user.cityId = city.id;
+    }
     return this.usersRepository.save(user);
   }
 
@@ -56,13 +63,17 @@ export class UsersService {
         `Невозможно обновить данные: пользователь с id ${id} не найден`,
       );
     }
-
-    const { wantToLearn, ...rest } = updateUserDto;
-
+    const { wantToLearn, cityId, ...rest } = updateUserDto;
     if (wantToLearn && wantToLearn.length > 0) {
       user.wantToLearn = await this.categoriesService.findByIds(wantToLearn);
     }
-
+    if (cityId) {
+      const city = await this.citiesRepository.findOne({
+        where: { id: cityId },
+      });
+      if (!city) throw new NotFoundException('City not found');
+      user.cityId = city.id;
+    }
     return this.usersRepository.save({ ...user, ...rest });
   }
 
@@ -87,12 +98,9 @@ export class UsersService {
       .addSelect('user.password')
       .where('user.id = :id', { id })
       .getOne();
-
     if (!user) throw new NotFoundException('User not found');
-
     const isMatch = await bcrypt.compare(dto.oldPassword, user.password);
     if (!isMatch) throw new UnauthorizedException('Old password is incorrect');
-
     user.password = await bcrypt.hash(dto.newPassword, this.config.hashSalt);
     await this.usersRepository.save(user);
   }

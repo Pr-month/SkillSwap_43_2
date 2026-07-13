@@ -4,15 +4,16 @@ import {
   Column,
   OneToMany,
   ManyToMany,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Roles, Gender } from '../users.enums';
 import { Skill } from '../../skills/entities/skill.entity';
 import { Category } from 'src/categories/entities/category.entity';
+import { City } from 'src/cities/entities/city.entity';
 
-@Entity({
-  name: 'users',
-})
+@Entity({ name: 'users' })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -33,8 +34,15 @@ export class User {
   @Column()
   birthdate: string;
 
-  @Column()
+  @Column({ nullable: true })
   city: string;
+
+  @ManyToOne(() => City, { nullable: true, eager: true })
+  @JoinColumn({ name: 'cityId' })
+  cityEntity?: City;
+
+  @Column({ nullable: true })
+  cityId?: string;
 
   @Column({ type: 'enum', enum: Gender })
   gender: Gender;

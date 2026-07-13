@@ -7,6 +7,8 @@ import {
   ArrayNotEmpty,
   IsDateString,
   IsEnum,
+  IsOptional,
+  IsUUID,
 } from 'class-validator';
 import { Gender } from '../../users/users.enums';
 
@@ -39,4 +41,8 @@ export class RegisterDto {
 
   @IsString()
   avatar: string;
+
+  @IsOptional()
+  @IsUUID()
+  cityId?: string;
 }
